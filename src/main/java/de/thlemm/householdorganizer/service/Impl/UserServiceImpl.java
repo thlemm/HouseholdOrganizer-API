@@ -2,6 +2,7 @@ package de.thlemm.householdorganizer.service.Impl;
 
 import de.thlemm.householdorganizer.controller.request.SignupRequest;
 import de.thlemm.householdorganizer.model.*;
+import de.thlemm.householdorganizer.repository.InterestRepository;
 import de.thlemm.householdorganizer.repository.RoleRepository;
 import de.thlemm.householdorganizer.repository.StatusRepository;
 import de.thlemm.householdorganizer.repository.UserRepository;
@@ -11,6 +12,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Service
@@ -27,6 +29,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     PasswordEncoder encoder;
+
+    @Autowired
+    InterestRepository interestRepository;
 
     @Override
     public void createNewUser(SignupRequest signupRequest) {

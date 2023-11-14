@@ -35,6 +35,9 @@ public class Item {
     private Room currentRoom;
 
     @NotNull
+    private Long location;
+
+    @NotNull
     private String image;
 
     @NotNull

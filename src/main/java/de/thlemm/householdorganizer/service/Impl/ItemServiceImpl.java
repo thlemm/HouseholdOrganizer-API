@@ -1,8 +1,8 @@
 package de.thlemm.householdorganizer.service.Impl;
 
-import de.thlemm.householdorganizer.controller.request.AddItemByAdminRequest;
 import de.thlemm.householdorganizer.controller.request.AddItemRequest;
 import de.thlemm.householdorganizer.model.Item;
+import de.thlemm.householdorganizer.model.Room;
 import de.thlemm.householdorganizer.model.Tag;
 import de.thlemm.householdorganizer.repository.ItemRepository;
 import de.thlemm.householdorganizer.repository.RoomRepository;
@@ -33,9 +33,13 @@ public class ItemServiceImpl implements ItemService {
     public void createNewItem(AddItemRequest addItemRequest) {
 
         Item item = new Item();
+        if (addItemRequest.getId() != null) {
+            item.setId(addItemRequest.getId());
+        }
         item.setType(typeRepository.findById(addItemRequest.getType()));
         item.setCurrentRoom(roomRepository.findById(addItemRequest.getCurrentRoom()));
         item.setOriginalRoom(roomRepository.findById(addItemRequest.getOriginalRoom()));
+        item.setLocation(addItemRequest.getLocation());
         item.setImage(addItemRequest.getImage());
         item.setCreated(OffsetDateTime.now(ZoneOffset.UTC));
 
@@ -50,22 +54,19 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public void createNewItemWithId(AddItemByAdminRequest addItemByAdminRequest) {
-        Item item = new Item();
-        item.setId(addItemByAdminRequest.getId());
-        item.setType(typeRepository.findById(addItemByAdminRequest.getType()));
-        item.setCurrentRoom(roomRepository.findById(addItemByAdminRequest.getCurrentRoom()));
-        item.setOriginalRoom(roomRepository.findById(addItemByAdminRequest.getOriginalRoom()));
-        item.setImage(addItemByAdminRequest.getImage());
-        item.setCreated(OffsetDateTime.now(ZoneOffset.UTC));
-
+    public void updateLocationById(Long itemId, Long location) {
+        Item item = itemRepository.findById(itemId);
+        item.setLocation(location);
+        item.setUpdated(OffsetDateTime.now(ZoneOffset.UTC));
         itemRepository.save(item);
+    }
 
-        for (String value : addItemByAdminRequest.getTags()) {
-            Tag tag = new Tag();
-            tag.setTag(value);
-            tag.setItem(item);
-            tagRepository.save(tag);
-        }
+    @Override
+    public void updateCurrentRoomById(Long itemId, Long roomId) {
+        Item item = itemRepository.findById(itemId);
+        Room currentRoom = roomRepository.findById(roomId);
+        item.setCurrentRoom(currentRoom);
+        item.setUpdated(OffsetDateTime.now(ZoneOffset.UTC));
+        itemRepository.save(item);
     }
 }
