@@ -1,6 +1,7 @@
 package de.thlemm.householdorganizer.service.Impl;
 
 import de.thlemm.householdorganizer.controller.request.AddItemRequest;
+import de.thlemm.householdorganizer.controller.request.SearchItemsRequest;
 import de.thlemm.householdorganizer.model.Item;
 import de.thlemm.householdorganizer.model.Room;
 import de.thlemm.householdorganizer.model.Tag;
@@ -15,6 +16,9 @@ import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
 
 @Service
 public class ItemServiceImpl implements ItemService {
@@ -36,12 +40,23 @@ public class ItemServiceImpl implements ItemService {
         if (addItemRequest.getId() != null) {
             item.setId(addItemRequest.getId());
         }
+        if (addItemRequest.getCreated() != null) {
+            item.setCreated(
+                    OffsetDateTime.parse(
+                            addItemRequest.getCreated(),
+                            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ssx")
+                    )
+            );
+        } else {
+            item.setCreated(OffsetDateTime.now(ZoneOffset.UTC)
+                    .truncatedTo(ChronoUnit.SECONDS)
+            );
+        }
         item.setType(typeRepository.findById(addItemRequest.getType()));
         item.setCurrentRoom(roomRepository.findById(addItemRequest.getCurrentRoom()));
         item.setOriginalRoom(roomRepository.findById(addItemRequest.getOriginalRoom()));
         item.setLocation(addItemRequest.getLocation());
         item.setImage(addItemRequest.getImage());
-        item.setCreated(OffsetDateTime.now(ZoneOffset.UTC));
 
         itemRepository.save(item);
 
@@ -57,7 +72,9 @@ public class ItemServiceImpl implements ItemService {
     public void updateLocationById(Long itemId, Long location) {
         Item item = itemRepository.findById(itemId);
         item.setLocation(location);
-        item.setUpdated(OffsetDateTime.now(ZoneOffset.UTC));
+        item.setUpdated(OffsetDateTime.now(ZoneOffset.UTC)
+                .truncatedTo(ChronoUnit.SECONDS)
+        );
         itemRepository.save(item);
     }
 
@@ -66,7 +83,35 @@ public class ItemServiceImpl implements ItemService {
         Item item = itemRepository.findById(itemId);
         Room currentRoom = roomRepository.findById(roomId);
         item.setCurrentRoom(currentRoom);
-        item.setUpdated(OffsetDateTime.now(ZoneOffset.UTC));
+        item.setUpdated(OffsetDateTime.now(ZoneOffset.UTC)
+                .truncatedTo(ChronoUnit.SECONDS)
+        );
         itemRepository.save(item);
+    }
+
+    @Override
+    public List<Item> findAllBySearchRequest(SearchItemsRequest searchItemsRequest) {
+
+        boolean requestHasType = searchItemsRequest.getType() != null;
+        boolean requestHasTags = searchItemsRequest.getTags().size() > 0;
+
+        if (requestHasTags && !requestHasType) {
+            String tags = String.join(",", searchItemsRequest.getTags());
+            return itemRepository.findAllByTags(
+                    tags
+            );
+        } else if (!requestHasTags && requestHasType) {
+            return itemRepository.findAllByType(
+                    searchItemsRequest.getType()
+            );
+        } else if (requestHasTags && requestHasType) {
+            String tags = String.join(",", searchItemsRequest.getTags());
+            return itemRepository.findAllByTypeAndTags(
+                    searchItemsRequest.getType(),
+                    tags
+            );
+        } else {
+            return null;
+        }
     }
 }

@@ -1,6 +1,7 @@
 package de.thlemm.householdorganizer.controller;
 
 import de.thlemm.householdorganizer.controller.request.AddItemRequest;
+import de.thlemm.householdorganizer.controller.request.SearchItemsRequest;
 import de.thlemm.householdorganizer.model.Item;
 
 import de.thlemm.householdorganizer.model.RoleName;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/v1")
@@ -39,11 +41,13 @@ public class ItemController {
     @Autowired
     RoleRepository roleRepository;
 
+    @PreAuthorize("hasRole('ROLE_USER')")
     @GetMapping("/items")
     public List<Item> getItems() {
         return itemRepository.findAll();
     }
 
+    @PreAuthorize("hasRole('ROLE_USER')")
     @GetMapping("/items/user")
     public List<Item> getItemsOfUser(@CurrentSecurityContext(expression = "authentication") Authentication authentication) {
         User authUser = userRepository.findByUsername(authentication.getName());
@@ -69,12 +73,18 @@ public class ItemController {
         }
 
         if (itemRepository.existsById(addItemRequest.getId())) {
+            System.out.println("Id already exists");
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
         User authUser = userRepository.findByUsername(authentication.getName());
         boolean userIsAdmin = authUser.getRoles().contains(roleRepository.findByName(RoleName.ROLE_ADMIN));
         if (addItemRequest.getId() != null && !userIsAdmin) {
+            System.out.println("Not admin id");
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        if (addItemRequest.getCreated() != null && !userIsAdmin) {
+            System.out.println("Not admin created");
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
@@ -111,5 +121,26 @@ public class ItemController {
         itemService.updateCurrentRoomById(itemId, roomId);
 
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @PostMapping("/items/search")
+    public ResponseEntity<?> searchItems(
+            @Valid @RequestBody SearchItemsRequest searchItemsRequest) {
+
+        if (!typeRepository.existsById(searchItemsRequest.getType())) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        System.out.println(searchItemsRequest.getTags());
+        System.out.println(searchItemsRequest.getTags().size());
+
+        return ResponseEntity.ok(itemService.findAllBySearchRequest(searchItemsRequest));
+    }
+
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @GetMapping("/items/location/{location}")
+    public ResponseEntity<?> reverseSearchItems(@PathVariable("location") Long location) {
+        return ResponseEntity.ok(itemRepository.findAllByLocation(location));
     }
 }

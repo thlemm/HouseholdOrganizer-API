@@ -4,6 +4,7 @@ import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 import java.util.Set;
 @Data
 public class AddItemRequest {
@@ -16,4 +17,6 @@ public class AddItemRequest {
     @NotBlank
     private String image;
     private Set<String> tags;
+    @Pattern(regexp = "^[0-9]{1,4}-[0-9]{1,2}-[0-9]{1,2} [0-9]{1,2}:[0-9]{1,2}:[0-9]{1,2}\\+[0-9]{2}$")
+    private String created;
 }
