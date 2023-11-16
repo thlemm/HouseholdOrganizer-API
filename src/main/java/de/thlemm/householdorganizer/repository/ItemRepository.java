@@ -46,4 +46,8 @@ public interface ItemRepository extends JpaRepository<Item, Integer> {
     List<Item> findAllByType(Long typeId);
 
     List<Item> findAllByLocation(Long location);
+
+    boolean existsByMark(Long id);
+    Item findTopByOrderByMarkDesc();
+    Item findByMark(Long mark);
 }

@@ -7,3 +7,7 @@
 </a>
 
 The REST-API of the HouseholdOrganizer project.
+
+The HouseholdOrganizer is an App for collaborative digital management and dissolution of a household.
+
+this Spring-based API replaces the old API written in PHP. You can find the archived repository here.

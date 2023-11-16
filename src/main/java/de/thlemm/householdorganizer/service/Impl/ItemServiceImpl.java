@@ -37,8 +37,10 @@ public class ItemServiceImpl implements ItemService {
     public void createNewItem(AddItemRequest addItemRequest) {
 
         Item item = new Item();
-        if (addItemRequest.getId() != null) {
-            item.setId(addItemRequest.getId());
+        if (addItemRequest.getMark() != null) {
+            item.setMark(addItemRequest.getMark());
+        } else {
+            item.setMark(itemRepository.findTopByOrderByMarkDesc().getMark() + 1L);
         }
         if (addItemRequest.getCreated() != null) {
             item.setCreated(

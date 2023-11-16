@@ -8,7 +8,7 @@ import javax.validation.constraints.Pattern;
 import java.util.Set;
 @Data
 public class AddItemRequest {
-    private Long id;
+    private Long mark;
     private Long type;
     private Long originalRoom;
     private Long currentRoom;

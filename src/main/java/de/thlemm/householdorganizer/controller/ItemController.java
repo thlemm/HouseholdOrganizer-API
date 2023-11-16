@@ -72,19 +72,17 @@ public class ItemController {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
-        if (itemRepository.existsById(addItemRequest.getId())) {
+        if (itemRepository.existsByMark(addItemRequest.getMark())) {
             System.out.println("Id already exists");
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
         User authUser = userRepository.findByUsername(authentication.getName());
         boolean userIsAdmin = authUser.getRoles().contains(roleRepository.findByName(RoleName.ROLE_ADMIN));
-        if (addItemRequest.getId() != null && !userIsAdmin) {
-            System.out.println("Not admin id");
+        if (addItemRequest.getMark() != null && !userIsAdmin) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
         if (addItemRequest.getCreated() != null && !userIsAdmin) {
-            System.out.println("Not admin created");
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 

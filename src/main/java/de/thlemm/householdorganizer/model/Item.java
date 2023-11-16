@@ -16,6 +16,8 @@ public class Item {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private Long mark;
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinTable(name = "items_types", schema="household_organizer",
             joinColumns = @JoinColumn(name = "item_id"),
@@ -52,5 +54,7 @@ public class Item {
     @JsonIgnoreProperties("item")
     @OneToMany(mappedBy = "item")
     private List<Interest> interests;
+
+    private Boolean assessed;
 
 }
