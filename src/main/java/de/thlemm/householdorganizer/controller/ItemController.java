@@ -126,7 +126,7 @@ public class ItemController {
     public ResponseEntity<?> searchItems(
             @Valid @RequestBody SearchItemsRequest searchItemsRequest) {
 
-        if (!typeRepository.existsById(searchItemsRequest.getType())) {
+        if (searchItemsRequest.getType() != null && !typeRepository.existsById(searchItemsRequest.getType())) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
@@ -140,5 +140,13 @@ public class ItemController {
     @GetMapping("/items/location/{location}")
     public ResponseEntity<?> reverseSearchItems(@PathVariable("location") Long location) {
         return ResponseEntity.ok(itemRepository.findAllByLocation(location));
+    }
+
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @GetMapping("/items/notassessed")
+    public ResponseEntity<?> notAssessedItems(@CurrentSecurityContext(expression = "authentication") Authentication authentication) {
+        User authUser = userRepository.findByUsername(authentication.getName());
+        // ToDo: Implement functionality to track dismissed items
+        return ResponseEntity.ok("");
     }
 }

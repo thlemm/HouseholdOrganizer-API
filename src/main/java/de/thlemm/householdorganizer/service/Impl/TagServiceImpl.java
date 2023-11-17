@@ -23,7 +23,7 @@ public class TagServiceImpl implements TagService {
         List<String> tagsList = new ArrayList<>();
 
         for (Tag tag : tagRepository.findAll()) {
-            tagsList.add(tag.getTag());
+            tagsList.add(tag.getTag().toLowerCase());
         }
 
         List<String> distinctTagsList = tagsList.stream()
