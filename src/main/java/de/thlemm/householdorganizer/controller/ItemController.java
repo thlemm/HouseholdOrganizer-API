@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/v1")
+@RequestMapping("/api/v2")
 public class ItemController {
     @Autowired
     ItemRepository itemRepository;

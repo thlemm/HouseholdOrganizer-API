@@ -31,7 +31,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/v1/auth")
+@RequestMapping("/api/v2/auth")
 public class AuthController {
 
     @Autowired

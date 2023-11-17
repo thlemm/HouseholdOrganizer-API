@@ -57,7 +57,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .cors().and()
                 .csrf().disable() // otherwise POST would not work
                 .authorizeRequests()
-                    .antMatchers("/v1/**").permitAll()
+                    .antMatchers("/api/v2/**").permitAll()
                     .anyRequest().authenticated()
                 .and()
                 //.httpBasic();
@@ -89,7 +89,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         config.addAllowedMethod("*");
         config.setAllowCredentials(true);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/v1/**", config);
+        source.registerCorsConfiguration("/api/v2/**", config);
         return source;
     }
 }

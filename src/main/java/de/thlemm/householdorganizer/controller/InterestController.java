@@ -16,7 +16,7 @@ import javax.validation.Valid;
 import java.util.List;
 
 @RestController
-@RequestMapping("/v1")
+@RequestMapping("/api/v2")
 public class InterestController {
     @Autowired
     InterestRepository interestRepository;
