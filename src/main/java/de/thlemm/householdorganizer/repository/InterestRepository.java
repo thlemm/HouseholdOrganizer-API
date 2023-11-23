@@ -12,5 +12,5 @@ import java.util.List;
 public interface InterestRepository extends JpaRepository<Interest, Integer> {
     Interest findById(Long id);
     Interest findByUserAndItem(User user, Item item);
-    boolean existsByUserAndItem(User user, Item item);
+    boolean existsByUserAndItemAndInterestedTrue(User user, Item item);
 }

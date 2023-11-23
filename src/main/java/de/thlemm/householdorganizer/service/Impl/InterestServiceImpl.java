@@ -33,17 +33,17 @@ public class InterestServiceImpl implements InterestService {
 
         interestRepository.save(interest);
 
-        if (isItemIsAssessed(item)) {
+        if (isItemAssessed(item)) {
             item.setAssessed(true);
             itemRepository.save(item);
         }
     }
 
-    private boolean isItemIsAssessed(Item item) {
+    private boolean isItemAssessed(Item item) {
         List<User> users = userRepository.findAll();
         boolean isAssessed = true;
         for(User user: users) {
-            if (!interestRepository.existsByUserAndItem(user, item)) {
+            if (!interestRepository.existsByUserAndItemAndInterestedTrue(user, item)) {
                 isAssessed = false;
             }
         }

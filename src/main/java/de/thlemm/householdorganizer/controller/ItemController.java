@@ -2,6 +2,7 @@ package de.thlemm.householdorganizer.controller;
 
 import de.thlemm.householdorganizer.controller.request.AddItemRequest;
 import de.thlemm.householdorganizer.controller.request.SearchItemsRequest;
+import de.thlemm.householdorganizer.model.Interest;
 import de.thlemm.householdorganizer.model.Item;
 
 import de.thlemm.householdorganizer.model.RoleName;
@@ -44,7 +45,8 @@ public class ItemController {
     @PreAuthorize("hasRole('ROLE_USER')")
     @GetMapping("/items")
     public List<Item> getItems() {
-        return itemRepository.findAll();
+        List<Item> itemList = itemRepository.findAll();
+        return filterInterested(itemList);
     }
 
     @PreAuthorize("hasRole('ROLE_USER')")
@@ -52,7 +54,8 @@ public class ItemController {
     public List<Item> getItemsOfUser(@CurrentSecurityContext(expression = "authentication") Authentication authentication) {
         User authUser = userRepository.findByUsername(authentication.getName());
 
-        return itemRepository.findAllOfInterestByUserId(authUser.getId());
+        List<Item> itemList = itemRepository.findAllOfInterestByUserId(authUser.getId());
+        return filterInterested(itemList);
     }
 
     @PreAuthorize("hasRole('ROLE_USER')")
@@ -126,27 +129,53 @@ public class ItemController {
     public ResponseEntity<?> searchItems(
             @Valid @RequestBody SearchItemsRequest searchItemsRequest) {
 
+        if (searchItemsRequest.getMark() != null && !itemRepository.existsByMark(searchItemsRequest.getMark())) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
         if (searchItemsRequest.getType() != null && !typeRepository.existsById(searchItemsRequest.getType())) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
-        System.out.println(searchItemsRequest.getTags());
-        System.out.println(searchItemsRequest.getTags().size());
 
-        return ResponseEntity.ok(itemService.findAllBySearchRequest(searchItemsRequest));
+        return ResponseEntity.ok(
+                filterInterested(
+                    itemService.findAllBySearchRequest(searchItemsRequest)
+                )
+        );
     }
 
     @PreAuthorize("hasRole('ROLE_USER')")
     @GetMapping("/items/location/{location}")
     public ResponseEntity<?> reverseSearchItems(@PathVariable("location") Long location) {
-        return ResponseEntity.ok(itemRepository.findAllByLocation(location));
+
+        if (!itemRepository.existsByLocation(location)) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        return ResponseEntity.ok(
+                filterInterested(
+                    itemRepository.findAllByLocation(location)
+                )
+        );
     }
 
     @PreAuthorize("hasRole('ROLE_USER')")
     @GetMapping("/items/notassessed")
-    public ResponseEntity<?> notAssessedItems(@CurrentSecurityContext(expression = "authentication") Authentication authentication) {
+    public ResponseEntity<?> nextNotAssessedItem(@CurrentSecurityContext(expression = "authentication") Authentication authentication) {
         User authUser = userRepository.findByUsername(authentication.getName());
-        // ToDo: Implement functionality to track dismissed items
-        return ResponseEntity.ok("");
+        return ResponseEntity.ok(itemRepository.findTopNotAssessedByUserId(authUser.getId())
+        );
     }
+
+    private List<Item> filterInterested(List<Item> itemList) {
+        itemList.forEach(item ->
+                item.setInterests(
+                        item.getInterests().stream()
+                                .filter(Interest::getInterested)
+                                .collect(Collectors.toList())
+                )
+        );
+        return itemList;
+    }
+
 }

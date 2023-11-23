@@ -42,11 +42,14 @@ public class InterestController {
                                         @Valid @RequestBody AddInterestRequest addInterestRequest) {
 
         Interest interest = new Interest();
-        User user = userRepository.findById(addInterestRequest.getUser());
-
         User authUser = userRepository.findByUsername(authentication.getName());
+        User user = userRepository.findById(addInterestRequest.getUser());
+        if (addInterestRequest.getUser() == null) {
+            user = authUser;
+        }
+
         boolean userIsAdmin = authUser.getRoles().contains(roleRepository.findByName(RoleName.ROLE_ADMIN));
-        if (authUser != user && !userIsAdmin) {
+        if (user != authUser && !userIsAdmin) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
 
@@ -61,6 +64,7 @@ public class InterestController {
 
         interest.setUser(user);
         interest.setItem(item);
+        interest.setInterested(addInterestRequest.getInterested());
 
         interestRepository.save(interest);
 
@@ -85,4 +89,5 @@ public class InterestController {
         interestRepository.delete(interest);
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
 }

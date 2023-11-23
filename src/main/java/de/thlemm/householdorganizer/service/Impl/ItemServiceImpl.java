@@ -59,6 +59,7 @@ public class ItemServiceImpl implements ItemService {
         item.setOriginalRoom(roomRepository.findById(addItemRequest.getOriginalRoom()));
         item.setLocation(addItemRequest.getLocation());
         item.setImage(addItemRequest.getImage());
+        item.setAssessed(false);
 
         itemRepository.save(item);
 
@@ -93,6 +94,10 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<Item> findAllBySearchRequest(SearchItemsRequest searchItemsRequest) {
+
+        if (searchItemsRequest.getMark() != null) {
+            return itemRepository.findAllByMark(searchItemsRequest.getMark());
+        }
 
         boolean requestHasType = searchItemsRequest.getType() != null;
         boolean requestHasTags = searchItemsRequest.getTags().size() > 0;
