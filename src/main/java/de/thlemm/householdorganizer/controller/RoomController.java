@@ -20,7 +20,7 @@ public class RoomController {
 
     @PreAuthorize("hasRole('ROLE_USER')")
     @GetMapping("/rooms")
-    public List<Room> getRooms(@RequestParam(value = "query", defaultValue="") String query) {
+    public List<Room> getRooms() {
 
         return roomRepository.findAll();
     }

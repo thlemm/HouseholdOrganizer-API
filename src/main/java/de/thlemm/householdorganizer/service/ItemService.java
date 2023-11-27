@@ -8,8 +8,6 @@ import java.util.List;
 
 public interface ItemService {
     void createNewItem(AddItemRequest addItemRequest);
-    void updateLocationById(Long itemId, Long location);
-
-    void updateCurrentRoomById(Long itemId, Long roomId);
+    void updateLocationById(Long itemId, Long locationId);
     List<Item> findAllBySearchRequest(SearchItemsRequest searchItemsRequest);
 }

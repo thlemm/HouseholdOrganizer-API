@@ -3,12 +3,10 @@ package de.thlemm.householdorganizer.service.Impl;
 import de.thlemm.householdorganizer.controller.request.AddItemRequest;
 import de.thlemm.householdorganizer.controller.request.SearchItemsRequest;
 import de.thlemm.householdorganizer.model.Item;
+import de.thlemm.householdorganizer.model.Location;
 import de.thlemm.householdorganizer.model.Room;
 import de.thlemm.householdorganizer.model.Tag;
-import de.thlemm.householdorganizer.repository.ItemRepository;
-import de.thlemm.householdorganizer.repository.RoomRepository;
-import de.thlemm.householdorganizer.repository.TagRepository;
-import de.thlemm.householdorganizer.repository.TypeRepository;
+import de.thlemm.householdorganizer.repository.*;
 import de.thlemm.householdorganizer.service.ItemService;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -33,6 +31,9 @@ public class ItemServiceImpl implements ItemService {
 
     @Autowired
     TagRepository tagRepository;
+
+    @Autowired
+    LocationRepository locationRepository;
     @Override
     public void createNewItem(AddItemRequest addItemRequest) {
 
@@ -55,9 +56,8 @@ public class ItemServiceImpl implements ItemService {
             );
         }
         item.setType(typeRepository.findById(addItemRequest.getType()));
-        item.setCurrentRoom(roomRepository.findById(addItemRequest.getCurrentRoom()));
+        item.setLocation(locationRepository.findById(addItemRequest.getLocation()));
         item.setOriginalRoom(roomRepository.findById(addItemRequest.getOriginalRoom()));
-        item.setLocation(addItemRequest.getLocation());
         item.setImage(addItemRequest.getImage());
         item.setAssessed(false);
 
@@ -72,20 +72,11 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public void updateLocationById(Long itemId, Long location) {
+    public void updateLocationById(Long itemId, Long locationId) {
         Item item = itemRepository.findById(itemId);
-        item.setLocation(location);
-        item.setUpdated(OffsetDateTime.now(ZoneOffset.UTC)
-                .truncatedTo(ChronoUnit.SECONDS)
+        item.setLocation(
+                locationRepository.findById(locationId)
         );
-        itemRepository.save(item);
-    }
-
-    @Override
-    public void updateCurrentRoomById(Long itemId, Long roomId) {
-        Item item = itemRepository.findById(itemId);
-        Room currentRoom = roomRepository.findById(roomId);
-        item.setCurrentRoom(currentRoom);
         item.setUpdated(OffsetDateTime.now(ZoneOffset.UTC)
                 .truncatedTo(ChronoUnit.SECONDS)
         );

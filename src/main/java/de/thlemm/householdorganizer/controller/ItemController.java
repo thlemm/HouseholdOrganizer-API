@@ -2,11 +2,8 @@ package de.thlemm.householdorganizer.controller;
 
 import de.thlemm.householdorganizer.controller.request.AddItemRequest;
 import de.thlemm.householdorganizer.controller.request.SearchItemsRequest;
-import de.thlemm.householdorganizer.model.Interest;
-import de.thlemm.householdorganizer.model.Item;
+import de.thlemm.householdorganizer.model.*;
 
-import de.thlemm.householdorganizer.model.RoleName;
-import de.thlemm.householdorganizer.model.User;
 import de.thlemm.householdorganizer.repository.*;
 import de.thlemm.householdorganizer.service.ItemService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +38,9 @@ public class ItemController {
 
     @Autowired
     RoleRepository roleRepository;
+
+    @Autowired
+    LocationRepository locationRepository;
 
     @PreAuthorize("hasRole('ROLE_USER')")
     @GetMapping("/items")
@@ -94,32 +94,20 @@ public class ItemController {
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    @PatchMapping("/item/{itemId}/location/{location}")
-    public ResponseEntity<?> updateLocation(@PathVariable("itemId") Long itemId, @PathVariable("location") Long location) {
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @PatchMapping("/item/{itemId}/location/{locationId}")
+    public ResponseEntity<?> updateLocation(@PathVariable("itemId") Long itemId, @PathVariable("locationId") Long locationId) {
 
         if (!itemRepository.existsById(itemId)) {
+            System.out.println("No item found");
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        if (!locationRepository.existsById(locationId)) {
+            System.out.println("No location found");
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
-        itemService.updateLocationById(itemId, location);
-
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
-
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    @PatchMapping("/item/{itemId}/room/{roomId}")
-    public ResponseEntity<?> updateCurrentRomm(@PathVariable("itemId") Long itemId, @PathVariable("roomId") Long roomId) {
-
-        if (!itemRepository.existsById(itemId)) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-
-        if (!roomRepository.existsById(roomId)) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-
-        itemService.updateCurrentRoomById(itemId, roomId);
+        itemService.updateLocationById(itemId, locationId);
 
         return new ResponseEntity<>(HttpStatus.OK);
     }
@@ -147,7 +135,12 @@ public class ItemController {
 
     @PreAuthorize("hasRole('ROLE_USER')")
     @GetMapping("/items/location/{location}")
-    public ResponseEntity<?> reverseSearchItems(@PathVariable("location") Long location) {
+    public ResponseEntity<?> reverseSearchItems(@PathVariable("location") Long locationMark) {
+
+        if (!locationRepository.existsByMark(locationMark)){
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        Location location = locationRepository.findByMark(locationMark);
 
         if (!itemRepository.existsByLocation(location)) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);

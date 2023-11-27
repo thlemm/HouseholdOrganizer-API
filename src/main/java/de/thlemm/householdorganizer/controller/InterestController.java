@@ -4,6 +4,7 @@ import de.thlemm.householdorganizer.controller.request.AddInterestRequest;
 import de.thlemm.householdorganizer.controller.request.AddItemRequest;
 import de.thlemm.householdorganizer.model.*;
 import de.thlemm.householdorganizer.repository.*;
+import de.thlemm.householdorganizer.service.InterestService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,6 +30,9 @@ public class InterestController {
 
     @Autowired
     RoleRepository roleRepository;
+
+    @Autowired
+    InterestService interestService;
 
 
     @GetMapping("/interests")
@@ -62,11 +66,11 @@ public class InterestController {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
-        interest.setUser(user);
-        interest.setItem(item);
-        interest.setInterested(addInterestRequest.getInterested());
-
-        interestRepository.save(interest);
+        interestService.createNewInterest(
+                authUser,
+                item,
+                addInterestRequest.getInterested()
+        );
 
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
@@ -90,4 +94,41 @@ public class InterestController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @PatchMapping("/interest/item/{itemId}")
+            public ResponseEntity<?> updateInterest(@CurrentSecurityContext(expression = "authentication") Authentication authentication,
+                                                    @PathVariable("itemId") Long itemId,
+                                                    @RequestParam Boolean isInterested) {
+
+        if (!itemRepository.existsById(itemId)) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        User authUser = userRepository.findByUsername(authentication.getName());
+        boolean userIsAdmin = authUser.getRoles().contains(roleRepository.findByName(RoleName.ROLE_ADMIN));
+
+        if (interestRepository.existsByItemAndUser(
+                itemRepository.findById(itemId),
+                authUser
+        )) {
+            Interest interest = interestRepository.findByUserAndItem(
+                    authUser,
+                    itemRepository.findById(itemId)
+            );
+            if (authUser != interest.getUser() && !userIsAdmin) {
+                return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+            }
+            interestService.updateInterest(
+                    interest,
+                    isInterested);
+        } else {
+            interestService.createNewInterest(
+                    authUser,
+                    itemRepository.findById(itemId),
+                    isInterested
+            );
+        }
+
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 }

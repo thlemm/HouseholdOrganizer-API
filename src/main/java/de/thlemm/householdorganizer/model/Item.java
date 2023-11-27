@@ -31,13 +31,10 @@ public class Item {
     private Room originalRoom;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinTable(name = "items_current_rooms", schema="household_organizer",
+    @JoinTable(name = "items_locations", schema="household_organizer",
             joinColumns = @JoinColumn(name = "item_id"),
-            inverseJoinColumns = @JoinColumn(name = "room_id"))
-    private Room currentRoom;
-
-    @NotNull
-    private Long location;
+            inverseJoinColumns = @JoinColumn(name = "location_id"))
+    private Location location;
 
     @NotNull
     private String image;

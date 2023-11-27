@@ -26,10 +26,11 @@ public class InterestServiceImpl implements InterestService {
     UserRepository userRepository;
 
     @Override
-    public void createNewInterest(User user, Item item) {
+    public void createNewInterest(User user, Item item, boolean isInterested) {
         Interest interest = new Interest();
         interest.setUser(user);
         interest.setItem(item);
+        interest.setInterested(isInterested);
 
         interestRepository.save(interest);
 
@@ -48,5 +49,11 @@ public class InterestServiceImpl implements InterestService {
             }
         }
         return isAssessed;
+    }
+
+    @Override
+    public void updateInterest(Interest interest, boolean isInterested) {
+        interest.setInterested(isInterested);
+        interestRepository.save(interest);
     }
 }
