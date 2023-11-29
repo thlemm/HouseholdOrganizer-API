@@ -2,6 +2,7 @@ package de.thlemm.householdorganizer;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.orm.jpa.support.OpenEntityManagerInViewFilter;
 import org.springframework.web.filter.CommonsRequestLoggingFilter;
@@ -9,7 +10,7 @@ import org.springframework.web.filter.CommonsRequestLoggingFilter;
 import javax.servlet.Filter;
 
 @SpringBootApplication
-public class HouseholdOrganizerBackendApplication {
+public class HouseholdOrganizerBackendApplication extends SpringBootServletInitializer {
     public static void main(String[] args) {
         SpringApplication.run(HouseholdOrganizerBackendApplication.class, args);
     }
