@@ -7,6 +7,7 @@ import de.thlemm.householdorganizer.model.Location;
 import de.thlemm.householdorganizer.model.Room;
 import de.thlemm.householdorganizer.model.Tag;
 import de.thlemm.householdorganizer.repository.*;
+import de.thlemm.householdorganizer.restore.RestoreItemData;
 import de.thlemm.householdorganizer.service.ItemService;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -35,26 +36,14 @@ public class ItemServiceImpl implements ItemService {
     @Autowired
     LocationRepository locationRepository;
     @Override
-    public void createNewItem(AddItemRequest addItemRequest) {
+    public Item createNewItem(AddItemRequest addItemRequest) {
 
         Item item = new Item();
-        if (addItemRequest.getMark() != null) {
-            item.setMark(addItemRequest.getMark());
-        } else {
-            item.setMark(itemRepository.findTopByOrderByMarkDesc().getMark() + 1L);
-        }
-        if (addItemRequest.getCreated() != null) {
-            item.setCreated(
-                    OffsetDateTime.parse(
-                            addItemRequest.getCreated(),
-                            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ssx")
-                    )
-            );
-        } else {
-            item.setCreated(OffsetDateTime.now(ZoneOffset.UTC)
-                    .truncatedTo(ChronoUnit.SECONDS)
-            );
-        }
+        item.setMark(itemRepository.findTopByOrderByMarkDesc().getMark() + 1L);
+        item.setCreated(OffsetDateTime.now(ZoneOffset.UTC)
+                .truncatedTo(ChronoUnit.SECONDS)
+        );
+
         item.setType(typeRepository.findById(addItemRequest.getType()));
         item.setLocation(locationRepository.findById(addItemRequest.getLocation()));
         item.setOriginalRoom(roomRepository.findById(addItemRequest.getOriginalRoom()));
@@ -64,6 +53,42 @@ public class ItemServiceImpl implements ItemService {
         itemRepository.save(item);
 
         for (String value : addItemRequest.getTags()) {
+            Tag tag = new Tag();
+            tag.setTag(value);
+            tag.setItem(item);
+            tagRepository.save(tag);
+        }
+        return item;
+    }
+
+    public void restoreItem(RestoreItemData restoreItemData) {
+        Item item = new Item();
+        if (restoreItemData.getMark() != null) {
+            item.setMark(restoreItemData.getMark());
+        } else {
+            item.setMark(itemRepository.findTopByOrderByMarkDesc().getMark() + 1L);
+        }
+        if (restoreItemData.getCreated() != null) {
+            item.setCreated(
+                    OffsetDateTime.parse(
+                            restoreItemData.getCreated(),
+                            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ssx")
+                    )
+            );
+        } else {
+            item.setCreated(OffsetDateTime.now(ZoneOffset.UTC)
+                    .truncatedTo(ChronoUnit.SECONDS)
+            );
+        }
+        item.setType(typeRepository.findById(restoreItemData.getType()));
+        item.setLocation(locationRepository.findById(restoreItemData.getLocation()));
+        item.setOriginalRoom(roomRepository.findById(restoreItemData.getOriginalRoom()));
+        item.setImage(restoreItemData.getImage());
+        item.setAssessed(false);
+
+        itemRepository.save(item);
+
+        for (String value : restoreItemData.getTags()) {
             Tag tag = new Tag();
             tag.setTag(value);
             tag.setItem(item);

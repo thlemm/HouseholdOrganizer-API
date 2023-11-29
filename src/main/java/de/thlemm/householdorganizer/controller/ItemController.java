@@ -2,6 +2,8 @@ package de.thlemm.householdorganizer.controller;
 
 import de.thlemm.householdorganizer.controller.request.AddItemRequest;
 import de.thlemm.householdorganizer.controller.request.SearchItemsRequest;
+import de.thlemm.householdorganizer.controller.resposnse.AddItemResponse;
+import de.thlemm.householdorganizer.controller.resposnse.MessageResponse;
 import de.thlemm.householdorganizer.model.*;
 
 import de.thlemm.householdorganizer.repository.*;
@@ -60,38 +62,27 @@ public class ItemController {
 
     @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping("/item")
-    public ResponseEntity<?> addItem(@CurrentSecurityContext(expression = "authentication") Authentication authentication,
-                                     @Valid @RequestBody AddItemRequest addItemRequest) {
+    public ResponseEntity<?> addItem(@Valid @RequestBody AddItemRequest addItemRequest) {
 
+        System.out.println("Entry endpoint /item");
         if (!typeRepository.existsById(addItemRequest.getType())) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-
-        if (!roomRepository.existsById(addItemRequest.getCurrentRoom())) {
+            System.out.println("type not exists");
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
         if (!roomRepository.existsById(addItemRequest.getOriginalRoom())) {
+            System.out.println("room not exists");
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
-        if (itemRepository.existsByMark(addItemRequest.getMark())) {
-            System.out.println("Id already exists");
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-
-        User authUser = userRepository.findByUsername(authentication.getName());
-        boolean userIsAdmin = authUser.getRoles().contains(roleRepository.findByName(RoleName.ROLE_ADMIN));
-        if (addItemRequest.getMark() != null && !userIsAdmin) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-        if (addItemRequest.getCreated() != null && !userIsAdmin) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-
-        itemService.createNewItem(addItemRequest);
-
-        return new ResponseEntity<>(HttpStatus.CREATED);
+        Item item = itemService.createNewItem(addItemRequest);
+        System.out.println("response ready");
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(new AddItemResponse(
+                        item.getId(),
+                        item.getMark(),
+                        item.getLocation()
+                ));
     }
 
     @PreAuthorize("hasRole('ROLE_USER')")

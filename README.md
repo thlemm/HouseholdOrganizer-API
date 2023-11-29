@@ -8,6 +8,7 @@
 
 The REST-API of the HouseholdOrganizer project.
 
-The HouseholdOrganizer is an App for collaborative digital management and dissolution of a household.
+The HouseholdOrganizer is a project for collaborative digital management and dissolution of a household. 
 
-this Spring-based API replaces the old API written in PHP. You can find the archived repository here.
+This Spring-based API replaces the old API written in PHP. You can find the archived repository [here](https://github.com/thlemm/HouseholdOrganizer-Legacy-API.)
+The frontend for this API is the [HouseholdOrganizer-App](https://github.com/thlemm/HouseholdOrganizer-App)
