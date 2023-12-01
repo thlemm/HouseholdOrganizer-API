@@ -3,16 +3,16 @@ package de.thlemm.householdorganizer.service.Impl;
 import de.thlemm.householdorganizer.controller.request.SignupRequest;
 import de.thlemm.householdorganizer.model.*;
 import de.thlemm.householdorganizer.repository.InterestRepository;
-import de.thlemm.householdorganizer.repository.RoleRepository;
-import de.thlemm.householdorganizer.repository.StatusRepository;
+import de.thlemm.householdorganizer.repository.UserRoleRepository;
+import de.thlemm.householdorganizer.repository.UserStatusRepository;
 import de.thlemm.householdorganizer.repository.UserRepository;
+import de.thlemm.householdorganizer.restore.RestoreUserData;
 import de.thlemm.householdorganizer.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Service
@@ -22,10 +22,10 @@ public class UserServiceImpl implements UserService {
     UserRepository userRepository;
 
     @Autowired
-    RoleRepository roleRepository;
+    UserRoleRepository userRoleRepository;
 
     @Autowired
-    StatusRepository statusRepository;
+    UserStatusRepository userStatusRepository;
 
     @Autowired
     PasswordEncoder encoder;
@@ -40,14 +40,27 @@ public class UserServiceImpl implements UserService {
                 signupRequest.getEmail(),
                 encoder.encode(signupRequest.getPassword()));
 
-        Set<Role> roles = new HashSet<>();
-        Role userRole = roleRepository.findByName(RoleName.ROLE_USER);
-        roles.add(userRole);
+        Set<UserRole> userRoles = new HashSet<>();
+        UserRole userRole = userRoleRepository.findByName(UserRoleName.ROLE_USER);
+        userRoles.add(userRole);
 
-        Status status = statusRepository.findByName(StatusName.STATUS_ACTIVE);
+        UserStatus userStatus = userStatusRepository.findByName(UserStatusName.USER_STATUS_ACTIVE);
 
-        user.setRoles(roles);
-        user.setStatus(status);
+        user.setRoles(userRoles);
+        user.setUserStatus(userStatus);
+        userRepository.save(user);
+    }
+
+    @Override
+    public void restoreUser(RestoreUserData restoreUserData) {
+        User user = new User(restoreUserData.getUsername(),
+                restoreUserData.getEmail(),
+                encoder.encode(restoreUserData.getPassword()));
+
+        user.setRoles(restoreUserData.getUserRoles());
+        user.setUserStatus(restoreUserData.getUserStatus());
+        user.setUserType(restoreUserData.getUserType());
+
         userRepository.save(user);
     }
 }

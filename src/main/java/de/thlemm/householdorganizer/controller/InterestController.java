@@ -1,7 +1,6 @@
 package de.thlemm.householdorganizer.controller;
 
 import de.thlemm.householdorganizer.controller.request.AddInterestRequest;
-import de.thlemm.householdorganizer.controller.request.AddItemRequest;
 import de.thlemm.householdorganizer.model.*;
 import de.thlemm.householdorganizer.repository.*;
 import de.thlemm.householdorganizer.service.InterestService;
@@ -29,7 +28,7 @@ public class InterestController {
     UserRepository userRepository;
 
     @Autowired
-    RoleRepository roleRepository;
+    UserRoleRepository userRoleRepository;
 
     @Autowired
     InterestService interestService;
@@ -52,7 +51,7 @@ public class InterestController {
             user = authUser;
         }
 
-        boolean userIsAdmin = authUser.getRoles().contains(roleRepository.findByName(RoleName.ROLE_ADMIN));
+        boolean userIsAdmin = authUser.getRoles().contains(userRoleRepository.findByName(UserRoleName.ROLE_ADMIN));
         if (user != authUser && !userIsAdmin) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
@@ -85,7 +84,7 @@ public class InterestController {
         }
 
         User authUser = userRepository.findByUsername(authentication.getName());
-        boolean userIsAdmin = authUser.getRoles().contains(roleRepository.findByName(RoleName.ROLE_ADMIN));
+        boolean userIsAdmin = authUser.getRoles().contains(userRoleRepository.findByName(UserRoleName.ROLE_ADMIN));
         if (authUser != interest.getUser() && !userIsAdmin) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
@@ -105,7 +104,7 @@ public class InterestController {
         }
 
         User authUser = userRepository.findByUsername(authentication.getName());
-        boolean userIsAdmin = authUser.getRoles().contains(roleRepository.findByName(RoleName.ROLE_ADMIN));
+        boolean userIsAdmin = authUser.getRoles().contains(userRoleRepository.findByName(UserRoleName.ROLE_ADMIN));
 
         if (interestRepository.existsByItemAndUser(
                 itemRepository.findById(itemId),

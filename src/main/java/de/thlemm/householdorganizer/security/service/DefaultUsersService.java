@@ -1,9 +1,10 @@
 package de.thlemm.householdorganizer.security.service;
 
 import de.thlemm.householdorganizer.model.*;
-import de.thlemm.householdorganizer.repository.RoleRepository;
-import de.thlemm.householdorganizer.repository.StatusRepository;
+import de.thlemm.householdorganizer.repository.UserRoleRepository;
+import de.thlemm.householdorganizer.repository.UserStatusRepository;
 import de.thlemm.householdorganizer.repository.UserRepository;
+import de.thlemm.householdorganizer.repository.UserTypeRepository;
 import lombok.Synchronized;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,16 +35,19 @@ public class DefaultUsersService {
     PasswordEncoder encoder;
 
     @Autowired
-    RoleRepository roleRepository;
+    UserRoleRepository userRoleRepository;
 
     @Autowired
-    StatusRepository statusRepository;
+    UserStatusRepository userStatusRepository;
+
+    @Autowired
+    UserTypeRepository userTypeRepository;
 
     public static final String DEBUG_USERNAME = "debug",
                                 DEBUG_PASSWORD = "Debug123",
                                 DEBUG_EMAIL = "noreply@example.com";
 
-    public static final Set<RoleName> DEBUG_ROLES = Set.of(RoleName.ROLE_USER, RoleName.ROLE_ADMIN);
+    public static final Set<UserRoleName> DEBUG_ROLES = Set.of(UserRoleName.ROLE_USER, UserRoleName.ROLE_ADMIN);
 
 
     @EventListener(ApplicationReadyEvent.class)
@@ -60,19 +64,21 @@ public class DefaultUsersService {
             debugUser = new User(DEBUG_USERNAME, DEBUG_EMAIL, encoder.encode(DEBUG_PASSWORD));
         }
         // By default, the debug user can't login and doesn't have access to anything
-        Set<Role> roles = Collections.emptySet();
-        Status status = statusRepository.findByName(StatusName.STATUS_BANNED);
+        Set<UserRole> userRoles = Collections.emptySet();
+        UserStatus userStatus = userStatusRepository.findByName(UserStatusName.USER_STATUS_BANNED);
         // But: if we're not in production mode, enable the debug user and give it all permissions
         if(!production) {
-            roles = DEBUG_ROLES.stream()
-                    .map(roleRepository::findByName)
+            userRoles = DEBUG_ROLES.stream()
+                    .map(userRoleRepository::findByName)
                     .collect(Collectors.toSet());
-            status = statusRepository.findByName(StatusName.STATUS_ACTIVE);
+            userStatus = userStatusRepository.findByName(UserStatusName.USER_STATUS_ACTIVE);
             log.warn("Debug user with full admin privileges is enabled. User: \"" + DEBUG_USERNAME
                     + "\", Password: \"" + DEBUG_PASSWORD + "\"");
         }
-        debugUser.setRoles(roles);
-        debugUser.setStatus(status);
+        UserType userType = userTypeRepository.findByName(UserTypeName.USER_TYPE_FAMILY);
+        debugUser.setRoles(userRoles);
+        debugUser.setUserStatus(userStatus);
+        debugUser.setUserType(userType);
         userRepository.save(debugUser);
     }
 }

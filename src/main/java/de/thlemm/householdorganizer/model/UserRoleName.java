@@ -1,6 +1,6 @@
 package de.thlemm.householdorganizer.model;
 
-public enum RoleName {
+public enum UserRoleName {
     ROLE_USER,
     ROLE_ADMIN
 }

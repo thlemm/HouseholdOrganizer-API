@@ -3,7 +3,6 @@ package de.thlemm.householdorganizer.controller;
 import de.thlemm.householdorganizer.controller.request.AddItemRequest;
 import de.thlemm.householdorganizer.controller.request.SearchItemsRequest;
 import de.thlemm.householdorganizer.controller.resposnse.AddItemResponse;
-import de.thlemm.householdorganizer.controller.resposnse.MessageResponse;
 import de.thlemm.householdorganizer.model.*;
 
 import de.thlemm.householdorganizer.repository.*;
@@ -30,16 +29,13 @@ public class ItemController {
     RoomRepository roomRepository;
 
     @Autowired
-    TypeRepository typeRepository;
+    ItemTypeRepository itemTypeRepository;
 
     @Autowired
     ItemService itemService;
 
     @Autowired
     UserRepository userRepository;
-
-    @Autowired
-    RoleRepository roleRepository;
 
     @Autowired
     LocationRepository locationRepository;
@@ -65,7 +61,7 @@ public class ItemController {
     public ResponseEntity<?> addItem(@Valid @RequestBody AddItemRequest addItemRequest) {
 
         System.out.println("Entry endpoint /item");
-        if (!typeRepository.existsById(addItemRequest.getType())) {
+        if (!itemTypeRepository.existsById(addItemRequest.getType())) {
             System.out.println("type not exists");
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
@@ -87,7 +83,10 @@ public class ItemController {
 
     @PreAuthorize("hasRole('ROLE_USER')")
     @PatchMapping("/item/{itemId}/location/{locationId}")
-    public ResponseEntity<?> updateLocation(@PathVariable("itemId") Long itemId, @PathVariable("locationId") Long locationId) {
+    public ResponseEntity<?> updateLocation(
+            @PathVariable("itemId") Long itemId,
+            @PathVariable("locationId") Long locationId)
+    {
 
         if (!itemRepository.existsById(itemId)) {
             System.out.println("No item found");
@@ -112,7 +111,7 @@ public class ItemController {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
-        if (searchItemsRequest.getType() != null && !typeRepository.existsById(searchItemsRequest.getType())) {
+        if (searchItemsRequest.getType() != null && !itemTypeRepository.existsById(searchItemsRequest.getType())) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
@@ -145,7 +144,9 @@ public class ItemController {
 
     @PreAuthorize("hasRole('ROLE_USER')")
     @GetMapping("/items/notassessed")
-    public ResponseEntity<?> nextNotAssessedItem(@CurrentSecurityContext(expression = "authentication") Authentication authentication) {
+    public ResponseEntity<?> nextNotAssessedItem(
+            @CurrentSecurityContext(expression = "authentication") Authentication authentication)
+    {
         User authUser = userRepository.findByUsername(authentication.getName());
         return ResponseEntity.ok(itemRepository.findTopNotAssessedByUserId(authUser.getId())
         );

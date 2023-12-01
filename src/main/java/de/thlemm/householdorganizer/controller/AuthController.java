@@ -6,8 +6,6 @@ import de.thlemm.householdorganizer.controller.resposnse.JwtResponse;
 import de.thlemm.householdorganizer.controller.resposnse.MessageResponse;
 import de.thlemm.householdorganizer.controller.resposnse.UserResponse;
 import de.thlemm.householdorganizer.model.*;
-import de.thlemm.householdorganizer.repository.RoleRepository;
-import de.thlemm.householdorganizer.repository.StatusRepository;
 import de.thlemm.householdorganizer.repository.UserRepository;
 import de.thlemm.householdorganizer.security.jwt.JwtUtils;
 import de.thlemm.householdorganizer.security.service.UserDetailsImpl;
@@ -20,14 +18,11 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @RestController
@@ -67,7 +62,7 @@ public class AuthController {
 
         User user = userRepository.findByUsername(loginRequest.getUsername());
         try {
-            if (user.getStatus().getName() == StatusName.STATUS_BANNED) {
+            if (user.getUserStatus().getName() == UserStatusName.USER_STATUS_BANNED) {
                 return ResponseEntity
                         .badRequest()
                         .body(new MessageResponse("Error: User is banned from the server!"));

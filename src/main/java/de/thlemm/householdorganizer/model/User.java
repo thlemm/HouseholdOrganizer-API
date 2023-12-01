@@ -2,7 +2,6 @@ package de.thlemm.householdorganizer.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sun.istack.NotNull;
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -36,14 +35,20 @@ public class User {
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "users_roles", schema="household_organizer",
             joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id"))
-    private Set<Role> roles = new HashSet<>();
+            inverseJoinColumns = @JoinColumn(name = "user_role_id"))
+    private Set<UserRole> roles = new HashSet<>();
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinTable(name = "users_status", schema="household_organizer",
             joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "status_id"))
-    private Status status = new Status();
+            inverseJoinColumns = @JoinColumn(name = "user_status_id"))
+    private UserStatus userStatus = new UserStatus();
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinTable(name = "users_types", schema="household_organizer",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_type_id"))
+    private UserType userType = new UserType();
 
     @JsonIgnoreProperties("user")
     @OneToMany(mappedBy = "user")

@@ -21,7 +21,7 @@ public class Item {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinTable(name = "items_types", schema="household_organizer",
             joinColumns = @JoinColumn(name = "item_id"),
-            inverseJoinColumns = @JoinColumn(name = "type_id"))
+            inverseJoinColumns = @JoinColumn(name = "item_type_id"))
     private ItemType type;
 
     @ManyToOne(fetch = FetchType.EAGER)

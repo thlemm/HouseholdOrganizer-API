@@ -1,6 +1,6 @@
 package de.thlemm.householdorganizer.model;
 
-public enum TypeName {
+public enum ItemTypeName {
     TYPE_DECORATION,
     TYPE_FURNITURE,
     TYPE_UTILITY_ITEM,

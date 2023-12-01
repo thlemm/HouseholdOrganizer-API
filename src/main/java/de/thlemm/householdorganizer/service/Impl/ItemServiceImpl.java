@@ -3,8 +3,6 @@ package de.thlemm.householdorganizer.service.Impl;
 import de.thlemm.householdorganizer.controller.request.AddItemRequest;
 import de.thlemm.householdorganizer.controller.request.SearchItemsRequest;
 import de.thlemm.householdorganizer.model.Item;
-import de.thlemm.householdorganizer.model.Location;
-import de.thlemm.householdorganizer.model.Room;
 import de.thlemm.householdorganizer.model.Tag;
 import de.thlemm.householdorganizer.repository.*;
 import de.thlemm.householdorganizer.restore.RestoreItemData;
@@ -25,7 +23,7 @@ public class ItemServiceImpl implements ItemService {
     RoomRepository roomRepository;
 
     @Autowired
-    TypeRepository typeRepository;
+    ItemTypeRepository itemTypeRepository;
 
     @Autowired
     ItemRepository itemRepository;
@@ -44,7 +42,7 @@ public class ItemServiceImpl implements ItemService {
                 .truncatedTo(ChronoUnit.SECONDS)
         );
 
-        item.setType(typeRepository.findById(addItemRequest.getType()));
+        item.setType(itemTypeRepository.findById(addItemRequest.getType()));
         item.setLocation(locationRepository.findById(addItemRequest.getLocation()));
         item.setOriginalRoom(roomRepository.findById(addItemRequest.getOriginalRoom()));
         item.setImage(addItemRequest.getImage());
@@ -80,7 +78,7 @@ public class ItemServiceImpl implements ItemService {
                     .truncatedTo(ChronoUnit.SECONDS)
             );
         }
-        item.setType(typeRepository.findById(restoreItemData.getType()));
+        item.setType(itemTypeRepository.findById(restoreItemData.getType()));
         item.setLocation(locationRepository.findById(restoreItemData.getLocation()));
         item.setOriginalRoom(roomRepository.findById(restoreItemData.getOriginalRoom()));
         item.setImage(restoreItemData.getImage());

@@ -7,8 +7,8 @@ import javax.persistence.*;
 
 @Entity
 @Data
-@Table(name = "item_types", schema="household_organizer")
-public class ItemType {
+@Table(name = "user_types", schema="household_organizer")
+public class UserType {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -17,6 +17,6 @@ public class ItemType {
     @Enumerated(EnumType.STRING)
     @NaturalId
     @Column(length = 60)
-    private ItemTypeName name;
+    private UserTypeName name;
 
 }
