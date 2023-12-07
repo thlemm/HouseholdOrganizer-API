@@ -52,6 +52,8 @@ public class Item {
     @OneToMany(mappedBy = "item")
     private List<Interest> interests;
 
-    private Boolean assessed;
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "transaction_id", referencedColumnName = "id")
+    private Transaction transaction;
 
 }

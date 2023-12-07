@@ -1,15 +1,14 @@
 package de.thlemm.householdorganizer.service.Impl;
 
-import de.thlemm.householdorganizer.model.Interest;
-import de.thlemm.householdorganizer.model.Item;
-import de.thlemm.householdorganizer.model.User;
-import de.thlemm.householdorganizer.repository.InterestRepository;
-import de.thlemm.householdorganizer.repository.ItemRepository;
-import de.thlemm.householdorganizer.repository.UserRepository;
+import de.thlemm.householdorganizer.model.*;
+import de.thlemm.householdorganizer.repository.*;
 import de.thlemm.householdorganizer.service.InterestService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 
@@ -25,6 +24,12 @@ public class InterestServiceImpl implements InterestService {
     @Autowired
     UserRepository userRepository;
 
+    @Autowired
+    TransactionRepository transactionRepository;
+
+    @Autowired
+    TransactionStatusRepository transactionStatusRepository;
+
     @Override
     public void createNewInterest(User user, Item item, boolean isInterested) {
         Interest interest = new Interest();
@@ -34,13 +39,35 @@ public class InterestServiceImpl implements InterestService {
 
         interestRepository.save(interest);
 
-        if (isItemAssessed(item)) {
-            item.setAssessed(true);
-            itemRepository.save(item);
+        Transaction transaction = item.getTransaction();
+        transaction.setUpdated(
+                OffsetDateTime.now(ZoneOffset.UTC)
+                        .truncatedTo(ChronoUnit.SECONDS)
+        );
+
+        boolean itemIsAssessed = itemIsAssessed(item);
+        boolean itemHasInterests = itemHasInterests(item);
+
+        TransactionStatus transactionStatus;
+
+        if (itemIsAssessed && itemHasInterests) {
+            transactionStatus = transactionStatusRepository.findByName(
+                    TransactionStatusName.TRANSACTION_STATUS_RESERVED
+            );
+        } else if (itemIsAssessed) {
+            transactionStatus = transactionStatusRepository.findByName(
+                    TransactionStatusName.TRANSACTION_STATUS_AVAILABLE
+            );
+        } else {
+            transactionStatus = transactionStatusRepository.findByName(
+                    TransactionStatusName.TRANSACTION_STATUS_NOT_ASSESSED
+            );
         }
+        transaction.setTransactionStatus(transactionStatus);
+        transactionRepository.save(transaction);
     }
 
-    private boolean isItemAssessed(Item item) {
+    private boolean itemIsAssessed(Item item) {
         List<User> users = userRepository.findAll();
         boolean isAssessed = true;
         for(User user: users) {
@@ -49,6 +76,18 @@ public class InterestServiceImpl implements InterestService {
             }
         }
         return isAssessed;
+    }
+
+    private boolean itemHasInterests(Item item) {
+        List<Interest> interests = interestRepository.findAllByItem(item);
+        boolean hasInterests = false;
+        for (Interest interest : interests) {
+            if (interest.getInterested()) {
+                hasInterests = true;
+                break;
+            }
+        }
+        return hasInterests;
     }
 
     @Override

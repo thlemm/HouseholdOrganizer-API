@@ -4,6 +4,8 @@ import de.thlemm.householdorganizer.controller.request.AddItemRequest;
 import de.thlemm.householdorganizer.controller.request.SearchItemsRequest;
 import de.thlemm.householdorganizer.model.Item;
 import de.thlemm.householdorganizer.model.Tag;
+import de.thlemm.householdorganizer.model.Transaction;
+import de.thlemm.householdorganizer.model.TransactionStatusName;
 import de.thlemm.householdorganizer.repository.*;
 import de.thlemm.householdorganizer.restore.RestoreItemData;
 import de.thlemm.householdorganizer.service.ItemService;
@@ -33,6 +35,12 @@ public class ItemServiceImpl implements ItemService {
 
     @Autowired
     LocationRepository locationRepository;
+
+    @Autowired
+    TransactionStatusRepository transactionStatusRepository;
+
+    @Autowired
+    TransactionRepository transactionRepository;
     @Override
     public Item createNewItem(AddItemRequest addItemRequest) {
 
@@ -46,7 +54,19 @@ public class ItemServiceImpl implements ItemService {
         item.setLocation(locationRepository.findById(addItemRequest.getLocation()));
         item.setOriginalRoom(roomRepository.findById(addItemRequest.getOriginalRoom()));
         item.setImage(addItemRequest.getImage());
-        item.setAssessed(false);
+
+        Transaction transaction = new Transaction();
+        transaction.setTransactionStatus(
+                transactionStatusRepository.findByName(
+                    TransactionStatusName.TRANSACTION_STATUS_NOT_ASSESSED
+                )
+        );
+        transaction.setUpdated(
+                OffsetDateTime.now(ZoneOffset.UTC)
+                        .truncatedTo(ChronoUnit.SECONDS)
+        );
+
+        transactionRepository.save(transaction);
 
         itemRepository.save(item);
 
@@ -82,7 +102,6 @@ public class ItemServiceImpl implements ItemService {
         item.setLocation(locationRepository.findById(restoreItemData.getLocation()));
         item.setOriginalRoom(roomRepository.findById(restoreItemData.getOriginalRoom()));
         item.setImage(restoreItemData.getImage());
-        item.setAssessed(false);
 
         itemRepository.save(item);
 
