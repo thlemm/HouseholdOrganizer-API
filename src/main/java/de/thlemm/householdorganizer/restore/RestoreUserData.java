@@ -2,7 +2,6 @@ package de.thlemm.householdorganizer.restore;
 
 import de.thlemm.householdorganizer.model.UserRole;
 import de.thlemm.householdorganizer.model.UserStatus;
-import de.thlemm.householdorganizer.model.UserType;
 import lombok.Data;
 
 import javax.validation.constraints.Email;
@@ -31,5 +30,4 @@ public class RestoreUserData {
 
     private Set<UserRole> userRoles = new HashSet<>();
     private UserStatus userStatus = new UserStatus();
-    private UserType userType = new UserType();
 }

@@ -59,7 +59,6 @@ public class UserServiceImpl implements UserService {
 
         user.setRoles(restoreUserData.getUserRoles());
         user.setUserStatus(restoreUserData.getUserStatus());
-        user.setUserType(restoreUserData.getUserType());
 
         userRepository.save(user);
     }

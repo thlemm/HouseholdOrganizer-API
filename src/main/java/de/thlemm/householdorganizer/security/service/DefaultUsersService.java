@@ -4,7 +4,6 @@ import de.thlemm.householdorganizer.model.*;
 import de.thlemm.householdorganizer.repository.UserRoleRepository;
 import de.thlemm.householdorganizer.repository.UserStatusRepository;
 import de.thlemm.householdorganizer.repository.UserRepository;
-import de.thlemm.householdorganizer.repository.UserTypeRepository;
 import lombok.Synchronized;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,14 +39,17 @@ public class DefaultUsersService {
     @Autowired
     UserStatusRepository userStatusRepository;
 
-    @Autowired
-    UserTypeRepository userTypeRepository;
 
     public static final String DEBUG_USERNAME = "debug",
                                 DEBUG_PASSWORD = "Debug123",
                                 DEBUG_EMAIL = "noreply@example.com";
 
-    public static final Set<UserRoleName> DEBUG_ROLES = Set.of(UserRoleName.ROLE_USER, UserRoleName.ROLE_ADMIN);
+    public static final Set<UserRoleName> DEBUG_ROLES = Set.of(
+            UserRoleName.ROLE_USER,
+            UserRoleName.ROLE_ADMIN,
+            UserRoleName.ROLE_FAMILY,
+            UserRoleName.ROLE_FRIEND
+    );
 
 
     @EventListener(ApplicationReadyEvent.class)
@@ -75,10 +77,8 @@ public class DefaultUsersService {
             log.warn("Debug user with full admin privileges is enabled. User: \"" + DEBUG_USERNAME
                     + "\", Password: \"" + DEBUG_PASSWORD + "\"");
         }
-        UserType userType = userTypeRepository.findByName(UserTypeName.USER_TYPE_FAMILY);
         debugUser.setRoles(userRoles);
         debugUser.setUserStatus(userStatus);
-        debugUser.setUserType(userType);
         userRepository.save(debugUser);
     }
 }

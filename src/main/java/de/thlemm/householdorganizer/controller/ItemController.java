@@ -60,19 +60,15 @@ public class ItemController {
     @PostMapping("/item")
     public ResponseEntity<?> addItem(@Valid @RequestBody AddItemRequest addItemRequest) {
 
-        System.out.println("Entry endpoint /item");
         if (!itemTypeRepository.existsById(addItemRequest.getType())) {
-            System.out.println("type not exists");
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
         if (!roomRepository.existsById(addItemRequest.getOriginalRoom())) {
-            System.out.println("room not exists");
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
         Item item = itemService.createNewItem(addItemRequest);
-        System.out.println("response ready");
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(new AddItemResponse(
                         item.getId(),
@@ -89,11 +85,9 @@ public class ItemController {
     {
 
         if (!itemRepository.existsById(itemId)) {
-            System.out.println("No item found");
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
         if (!locationRepository.existsById(locationId)) {
-            System.out.println("No location found");
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
@@ -149,6 +143,13 @@ public class ItemController {
     {
         User authUser = userRepository.findByUsername(authentication.getName());
         return ResponseEntity.ok(itemRepository.findTopNotAssessedByUserId(authUser.getId())
+        );
+    }
+
+    @GetMapping("/item/today")
+    public ResponseEntity<?> getItemOfTheDay() {
+        return ResponseEntity.ok(
+                itemService.getItemOfTheDay()
         );
     }
 

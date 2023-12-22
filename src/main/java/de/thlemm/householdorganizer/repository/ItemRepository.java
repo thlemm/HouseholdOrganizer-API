@@ -56,4 +56,9 @@ public interface ItemRepository extends JpaRepository<Item, Integer> {
             "WHERE interest.user_id = :userId AND interest.item_id = item.id)" +
             " ORDER BY item.id ASC LIMIT 1", nativeQuery = true)
     Item findTopNotAssessedByUserId(Long userId);
+
+    @Query(value="SELECT * FROM household_organizer.items item" +
+            JOIN_NECESSARY_FIELDS_FOR_MAPPING +
+            " ORDER BY item.id DESC LIMIT 1", nativeQuery = true)
+    Item findTopById();
 }

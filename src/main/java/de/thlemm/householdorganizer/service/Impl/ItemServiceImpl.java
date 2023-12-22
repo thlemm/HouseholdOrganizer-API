@@ -11,13 +11,16 @@ import de.thlemm.householdorganizer.restore.RestoreItemData;
 import de.thlemm.householdorganizer.service.ItemService;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ItemServiceImpl implements ItemService {
@@ -41,6 +44,29 @@ public class ItemServiceImpl implements ItemService {
 
     @Autowired
     TransactionRepository transactionRepository;
+
+    private Long itemOfTheDay;
+
+    @PostConstruct
+    private void setItemOfTheDayOnStartUp() {
+        setItemOfTheDay();
+    }
+     @Scheduled(cron = "00 00 * * *", zone = "Europe/Paris")
+     private void setItemOfTheDayOnSchedule() {
+         setItemOfTheDay();
+     }
+
+     private void setItemOfTheDay() {
+        Long topId = itemRepository.findTopById().getId();
+        while (true) {
+            Long randomId = (long) (Math.random() * topId + 1);
+            if (itemRepository.existsById(randomId)) {
+                itemOfTheDay = randomId;
+                break;
+            }
+        }
+     }
+
     @Override
     public Item createNewItem(AddItemRequest addItemRequest) {
 
@@ -153,5 +179,10 @@ public class ItemServiceImpl implements ItemService {
         } else {
             return null;
         }
+    }
+
+    @Override
+    public Item getItemOfTheDay() {
+        return itemRepository.findById(itemOfTheDay);
     }
 }

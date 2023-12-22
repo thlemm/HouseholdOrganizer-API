@@ -1,5 +1,6 @@
 package de.thlemm.householdorganizer.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sun.istack.NotNull;
 import lombok.Getter;
@@ -22,9 +23,11 @@ public class User {
     @NotNull
     @Column(nullable = false, unique = true)
     private String username;
+    @JsonIgnore
     @NotNull
     @Column(nullable = false, unique = false)
     private String password;
+    @JsonIgnore
     @NotNull
     @Column(nullable = false, unique = true)
     private String email;
@@ -41,13 +44,8 @@ public class User {
             inverseJoinColumns = @JoinColumn(name = "user_status_id"))
     private UserStatus userStatus = new UserStatus();
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinTable(name = "users_types", schema="household_organizer",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "user_type_id"))
-    private UserType userType = new UserType();
-
     @JsonIgnoreProperties("user")
+    @JsonIgnore
     @OneToMany(mappedBy = "user")
     private List<Interest> interests;
 

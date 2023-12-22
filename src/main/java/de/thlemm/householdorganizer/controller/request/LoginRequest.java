@@ -10,7 +10,7 @@ import javax.validation.constraints.Size;
 public class LoginRequest {
     @NotBlank
     @Size(min = 3, max = 20)
-    @Pattern(regexp = "^[a-zA-Z0-9ÄäÖöÜü.\\-_]{3,20}$")
+    @Pattern(regexp = "^[a-zA-Z0-9ÄäÖöÜü.\\-_&]{3,20}$")
     private String username;
  
     @NotBlank

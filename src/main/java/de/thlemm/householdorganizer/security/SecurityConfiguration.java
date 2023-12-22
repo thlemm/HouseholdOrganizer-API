@@ -55,12 +55,11 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http
                 .cors().and()
-                .csrf().disable() // otherwise POST would not work
+                .csrf().disable()
                 .authorizeRequests()
                     .antMatchers("/api/v2/**").permitAll()
                     .anyRequest().authenticated()
                 .and()
-                //.httpBasic();
                 .exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 

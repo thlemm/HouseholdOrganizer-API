@@ -7,6 +7,7 @@ import de.thlemm.householdorganizer.controller.resposnse.MessageResponse;
 import de.thlemm.householdorganizer.controller.resposnse.UserResponse;
 import de.thlemm.householdorganizer.model.*;
 import de.thlemm.householdorganizer.repository.UserRepository;
+import de.thlemm.householdorganizer.repository.UserRoleRepository;
 import de.thlemm.householdorganizer.security.jwt.JwtUtils;
 import de.thlemm.householdorganizer.security.service.UserDetailsImpl;
 import de.thlemm.householdorganizer.service.UserService;
@@ -37,6 +38,9 @@ public class AuthController {
 
     @Autowired
     AuthenticationManager authenticationManager;
+
+    @Autowired
+    UserRoleRepository userRoleRepository;
 
     @Autowired
     JwtUtils jwtUtils;
@@ -107,5 +111,21 @@ public class AuthController {
         userService.createNewUser(signUpRequest);
 
         return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
+    }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping("/roles")
+    public ResponseEntity<?> getRoles() {
+        return ResponseEntity.ok(
+              userRoleRepository.findAll()
+        );
+    }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping("/users")
+    public ResponseEntity<?> getUsers() {
+        return ResponseEntity.ok(
+                userRepository.findAll()
+        );
     }
 }

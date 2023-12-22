@@ -96,17 +96,13 @@ CREATE TABLE "household_organizer"."users_status" (
     CONSTRAINT "users_status_pkey" PRIMARY KEY ("user_id", "user_status_id")
 );
 
-CREATE TABLE "household_organizer"."users_types" (
-    "user_id" BIGINT NOT NULL,
-    "user_type_id" BIGINT NOT NULL,
-    CONSTRAINT "users_types_pkey" PRIMARY KEY ("user_id", "user_type_id")
-);
-
 INSERT INTO "household_organizer"."user_roles"
     (id, name)
 VALUES
     (1, 'ROLE_USER'),
-    (2, 'ROLE_ADMIN')
+    (2, 'ROLE_ADMIN'),
+    (3, 'ROLE_FAMILY'),
+    (4, 'ROLE_FRIEND')
 ON CONFLICT DO NOTHING;
 
 INSERT INTO "household_organizer"."user_status"
@@ -114,13 +110,6 @@ INSERT INTO "household_organizer"."user_status"
 VALUES
     (1, 'USER_STATUS_ACTIVE'),
     (2, 'USER_STATUS_BANNED')
-ON CONFLICT DO NOTHING;
-
-INSERT INTO "household_organizer"."user_types"
-    (id, name)
-VALUES
-    (1, 'USER_TYPE_FAMILY'),
-    (2, 'USER_TYPE_FRIEND')
 ON CONFLICT DO NOTHING;
 
 --changeset author:thlemm add:type no:3
