@@ -125,8 +125,8 @@ VALUES
     (1, 'TYPE_DECORATION'),
     (2, 'TYPE_FURNITURE'),
     (3, 'TYPE_UTILITY_ITEM'),
-    (4, 'ROOM_TECHNICAL_DEVICE'),
-    (5, 'ROOM_FURNISHING')
+    (4, 'TYPE_TECHNICAL_DEVICE'),
+    (5, 'TYPE_FURNISHING')
 ON CONFLICT DO NOTHING;
 
 CREATE TABLE "household_organizer"."items_types" (

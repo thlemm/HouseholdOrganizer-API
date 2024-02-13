@@ -2,15 +2,16 @@ package de.thlemm.householdorganizer.service.Impl;
 
 import de.thlemm.householdorganizer.controller.request.AddItemRequest;
 import de.thlemm.householdorganizer.controller.request.SearchItemsRequest;
-import de.thlemm.householdorganizer.model.Item;
-import de.thlemm.householdorganizer.model.Tag;
-import de.thlemm.householdorganizer.model.Transaction;
-import de.thlemm.householdorganizer.model.TransactionStatusName;
+import de.thlemm.householdorganizer.model.*;
 import de.thlemm.householdorganizer.repository.*;
 import de.thlemm.householdorganizer.restore.RestoreItemData;
 import de.thlemm.householdorganizer.service.ItemService;
+import lombok.Synchronized;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
+import org.springframework.core.annotation.Order;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -47,7 +48,9 @@ public class ItemServiceImpl implements ItemService {
 
     private Long itemOfTheDay;
 
-    @PostConstruct
+    @EventListener(ApplicationReadyEvent.class)
+    @Order(3)
+    @Synchronized
     private void setItemOfTheDayOnStartUp() {
         setItemOfTheDay();
     }
@@ -57,14 +60,18 @@ public class ItemServiceImpl implements ItemService {
      }
 
      private void setItemOfTheDay() {
-        Long topId = itemRepository.findTopById().getId();
-        while (true) {
-            Long randomId = (long) (Math.random() * topId + 1);
-            if (itemRepository.existsById(randomId)) {
-                itemOfTheDay = randomId;
-                break;
+        Item topItem = itemRepository.findTopById();
+        if (topItem != null) {
+            Long topId = topItem.getId();
+            while (true) {
+                Long randomId = (long) (Math.random() * topId + 1);
+                if (itemRepository.existsById(randomId)) {
+                    itemOfTheDay = randomId;
+                    break;
+                }
             }
         }
+
      }
 
     @Override
@@ -77,7 +84,17 @@ public class ItemServiceImpl implements ItemService {
         );
 
         item.setType(itemTypeRepository.findById(addItemRequest.getType()));
-        item.setLocation(locationRepository.findById(addItemRequest.getLocation()));
+
+        Location location = locationRepository.findByMark(addItemRequest.getLocation());
+        if (location == null) {
+            location = new Location();
+            location.setMark(addItemRequest.getLocation());
+            location.setBox(addItemRequest.getBox());
+            location.setRoom(roomRepository.findById(addItemRequest.getCurrentRoom()));
+            locationRepository.save(location);
+        }
+        item.setLocation(location);
+
         item.setOriginalRoom(roomRepository.findById(addItemRequest.getOriginalRoom()));
         item.setImage(addItemRequest.getImage());
 
@@ -93,6 +110,7 @@ public class ItemServiceImpl implements ItemService {
         );
 
         transactionRepository.save(transaction);
+        item.setTransaction(transaction);
 
         itemRepository.save(item);
 

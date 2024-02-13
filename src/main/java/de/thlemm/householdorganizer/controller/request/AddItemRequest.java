@@ -9,6 +9,8 @@ import java.util.Set;
 public class AddItemRequest {
     private Long type;
     private Long originalRoom;
+    private Long currentRoom;
+    private Boolean box;
     @NotNull
     private Long location;
     @NotBlank

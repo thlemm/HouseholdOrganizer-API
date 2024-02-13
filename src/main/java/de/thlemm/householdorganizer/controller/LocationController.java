@@ -7,6 +7,7 @@ import de.thlemm.householdorganizer.repository.LocationRepository;
 import de.thlemm.householdorganizer.repository.RoomRepository;
 import de.thlemm.householdorganizer.service.LocationService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -68,4 +69,17 @@ public class LocationController {
 
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @GetMapping("/location/{mark}")
+    public ResponseEntity<?> getBoxIfExists(@PathVariable("mark") Long mark) {
+        Location location = locationRepository.findByMark(mark);
+        if (location == null) {
+            return new ResponseEntity<>(HttpStatus.OK);
+        }
+        return ResponseEntity.ok(
+                location
+        );
+    }
+
 }

@@ -11,5 +11,5 @@ import org.springframework.stereotype.Repository;
 public interface TransactionRepository extends JpaRepository<Transaction, Integer> {
 
     Transaction findById(Long id);
-
+    boolean existsById(Long id);
 }

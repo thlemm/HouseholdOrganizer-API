@@ -1,6 +1,7 @@
 package de.thlemm.householdorganizer.controller;
 
 import de.thlemm.householdorganizer.controller.request.LoginRequest;
+import de.thlemm.householdorganizer.controller.request.SetUserRolesRequest;
 import de.thlemm.householdorganizer.controller.request.SignupRequest;
 import de.thlemm.householdorganizer.controller.resposnse.JwtResponse;
 import de.thlemm.householdorganizer.controller.resposnse.MessageResponse;
@@ -21,9 +22,12 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import javax.management.relation.Role;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @RestController
@@ -89,7 +93,6 @@ public class AuthController {
         return ResponseEntity.ok(new JwtResponse(jwt,
                 userDetails.getId(),
                 userDetails.getUsername(),
-                userDetails.getEmail(),
                 roles));
     }
 
@@ -127,5 +130,31 @@ public class AuthController {
         return ResponseEntity.ok(
                 userRepository.findAll()
         );
+    }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PostMapping("/user/roles")
+    public ResponseEntity<?> setUserRoles(@Valid @RequestBody SetUserRolesRequest setUserRolesRequest) {
+        User user = userRepository.findById(setUserRolesRequest.getUserId());
+        if (user == null) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse("Error: User does not exist!"));
+        }
+
+        Set<UserRole> newRoles = new HashSet<>();
+        for (Long roleId : setUserRolesRequest.getRoleIds()) {
+            UserRole userRole = userRoleRepository.findById(roleId);
+            if (userRole == null) {
+                return ResponseEntity
+                        .badRequest()
+                        .body(new MessageResponse("Error: Role does not exist!"));
+            }
+            newRoles.add(userRole);
+        }
+
+        userService.updateUserRoles(user, newRoles);
+
+        return ResponseEntity.ok(new MessageResponse("User roles updated successfully!"));
     }
 }

@@ -2,11 +2,15 @@ package de.thlemm.householdorganizer.controller;
 
 import de.thlemm.householdorganizer.controller.request.AddItemRequest;
 import de.thlemm.householdorganizer.controller.request.SearchItemsRequest;
+import de.thlemm.householdorganizer.controller.request.SetTransactionRequest;
 import de.thlemm.householdorganizer.controller.resposnse.AddItemResponse;
+import de.thlemm.householdorganizer.controller.resposnse.MessageResponse;
 import de.thlemm.householdorganizer.model.*;
 
 import de.thlemm.householdorganizer.repository.*;
 import de.thlemm.householdorganizer.service.ItemService;
+import de.thlemm.householdorganizer.service.TransactionService;
+import de.thlemm.householdorganizer.service.exception.TransactionServiceException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -39,6 +43,12 @@ public class ItemController {
 
     @Autowired
     LocationRepository locationRepository;
+    @Autowired
+    TransactionRepository transactionRepository;
+    @Autowired
+    TransactionStatusRepository transactionStatusRepository;
+    @Autowired
+    TransactionService transactionService;
 
     @PreAuthorize("hasRole('ROLE_USER')")
     @GetMapping("/items")
@@ -56,6 +66,26 @@ public class ItemController {
         return filterInterested(itemList);
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping("/user/{userId}/items")
+    public ResponseEntity<?> getItemsOfUserById(
+            @CurrentSecurityContext(expression = "authentication") Authentication authentication,
+            @PathVariable("userId") Long userId
+    ) {
+        User user = userRepository.findById(userId);
+
+        if (user == null) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        List<Item> itemList = itemRepository.findAllOfInterestByUserId(user.getId());
+        return ResponseEntity.ok(
+                filterInterested(
+                        itemList
+                )
+        );
+    }
+
     @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping("/item")
     public ResponseEntity<?> addItem(@Valid @RequestBody AddItemRequest addItemRequest) {
@@ -65,6 +95,10 @@ public class ItemController {
         }
 
         if (!roomRepository.existsById(addItemRequest.getOriginalRoom())) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        if (!roomRepository.existsById(addItemRequest.getCurrentRoom())) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
@@ -151,6 +185,33 @@ public class ItemController {
         return ResponseEntity.ok(
                 itemService.getItemOfTheDay()
         );
+    }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PatchMapping("/item/{itemId}/transaction")
+    public ResponseEntity<?> setTransactionForItem(
+            @PathVariable("itemId") Long itemId,
+            @Valid @RequestBody SetTransactionRequest setTransactionRequest
+    ) {
+        System.out.println("Request route successful");
+        if (!itemRepository.existsById(itemId)) {
+            System.out.println("Item id does not exist");
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        if(!transactionStatusRepository.existsById(setTransactionRequest.getTransactionStatusId())){
+            System.out.println("Status id does not exist");
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        try {
+            System.out.println("Trying to set via service");
+            transactionService.setTransaction(itemId, setTransactionRequest);
+        } catch (TransactionServiceException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new MessageResponse(e.getMsg()));
+        }
+
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     private List<Item> filterInterested(List<Item> itemList) {

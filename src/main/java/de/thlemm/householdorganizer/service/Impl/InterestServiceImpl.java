@@ -95,4 +95,11 @@ public class InterestServiceImpl implements InterestService {
         interest.setInterested(isInterested);
         interestRepository.save(interest);
     }
+
+    @Override
+    public void resetAllInterestsForItem(Item item){
+        for(Interest interest : item.getInterests()) {
+            interestRepository.delete(interest);
+        }
+    }
 }

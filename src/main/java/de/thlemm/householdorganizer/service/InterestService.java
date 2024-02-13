@@ -7,4 +7,5 @@ import de.thlemm.householdorganizer.model.User;
 public interface InterestService {
     void createNewInterest(User user, Item item, boolean isInterested);
     void updateInterest(Interest interest, boolean isInterested);
+    void resetAllInterestsForItem(Item item);
 }

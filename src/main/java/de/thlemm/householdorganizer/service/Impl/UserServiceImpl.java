@@ -62,4 +62,16 @@ public class UserServiceImpl implements UserService {
 
         userRepository.save(user);
     }
+
+    @Override
+    public  void updateUserRoles(User user, Set<UserRole> newRoles) {
+
+        Set<UserRole> currentRoles = user.getRoles();
+        Set<UserRole> rolesToSet = new HashSet<>(currentRoles);
+        rolesToSet.addAll(newRoles);
+
+        user.setRoles(rolesToSet);
+        userRepository.save(user);
+
+    }
 }

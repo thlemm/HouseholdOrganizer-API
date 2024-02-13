@@ -10,4 +10,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface TransactionStatusRepository extends JpaRepository<TransactionStatus, String> {
     TransactionStatus findByName(TransactionStatusName name);
+    TransactionStatus findById(Long id);
+    boolean existsById(Long id);
 }
