@@ -10,7 +10,7 @@ import java.util.List;
 
 @Entity
 @Data
-@Table(name = "items", schema = "household_organizer")
+@Table(name = "items", schema = "thlemmde_household")
 public class Item {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,19 +19,19 @@ public class Item {
     private Long mark;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinTable(name = "items_types", schema="household_organizer",
+    @JoinTable(name = "items_types", schema = "thlemmde_household",
             joinColumns = @JoinColumn(name = "item_id"),
             inverseJoinColumns = @JoinColumn(name = "item_type_id"))
     private ItemType type;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinTable(name = "items_original_rooms", schema="household_organizer",
+    @JoinTable(name = "items_original_rooms", schema = "thlemmde_household",
             joinColumns = @JoinColumn(name = "item_id"),
             inverseJoinColumns = @JoinColumn(name = "room_id"))
     private Room originalRoom;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinTable(name = "items_locations", schema="household_organizer",
+    @JoinTable(name = "items_locations", schema = "thlemmde_household",
             joinColumns = @JoinColumn(name = "item_id"),
             inverseJoinColumns = @JoinColumn(name = "location_id"))
     private Location location;

@@ -7,7 +7,7 @@ import javax.persistence.*;
 
 @Entity
 @Data
-@Table(name = "locations", schema = "household_organizer")
+@Table(name = "locations", schema = "thlemmde_household")
 public class Location {
 
     @Id
@@ -17,7 +17,7 @@ public class Location {
     private Long mark;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinTable(name = "locations_rooms", schema="household_organizer",
+    @JoinTable(name = "locations_rooms", schema = "thlemmde_household",
             joinColumns = @JoinColumn(name = "location_id"),
             inverseJoinColumns = @JoinColumn(name = "room_id"))
     private Room room;

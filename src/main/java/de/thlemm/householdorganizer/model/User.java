@@ -14,7 +14,7 @@ import java.util.Set;
 @Entity
 @Getter
 @Setter
-@Table(name = "users", schema="household_organizer")
+@Table(name = "users", schema = "thlemmde_household")
 public class User {
 
     @Id
@@ -33,13 +33,13 @@ public class User {
     private String email;
 
     @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "users_roles", schema="household_organizer",
+    @JoinTable(name = "users_roles", schema = "thlemmde_household",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "user_role_id"))
     private Set<UserRole> roles = new HashSet<>();
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinTable(name = "users_status", schema="household_organizer",
+    @JoinTable(name = "users_status", schema = "thlemmde_household",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "user_status_id"))
     private UserStatus userStatus = new UserStatus();

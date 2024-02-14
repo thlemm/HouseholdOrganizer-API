@@ -9,7 +9,7 @@ import java.util.Set;
 
 @Entity
 @Data
-@Table(name = "user_status", schema="household_organizer")
+@Table(name = "user_status", schema = "thlemmde_household")
 public class UserStatus {
 
     @Id
