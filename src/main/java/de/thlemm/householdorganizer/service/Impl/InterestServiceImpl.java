@@ -2,6 +2,7 @@ package de.thlemm.householdorganizer.service.Impl;
 
 import de.thlemm.householdorganizer.model.*;
 import de.thlemm.householdorganizer.repository.*;
+import de.thlemm.householdorganizer.security.service.DefaultUsersService;
 import de.thlemm.householdorganizer.service.InterestService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -10,6 +11,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Objects;
 
 
 @Service
@@ -39,6 +41,10 @@ public class InterestServiceImpl implements InterestService {
 
         interestRepository.save(interest);
 
+        updateTransactionStatusOfItem(item);
+    }
+
+    private void updateTransactionStatusOfItem(Item item) {
         Transaction transaction = item.getTransaction();
         transaction.setUpdated(
                 OffsetDateTime.now(ZoneOffset.UTC)
@@ -71,7 +77,8 @@ public class InterestServiceImpl implements InterestService {
         List<User> users = userRepository.findAll();
         boolean isAssessed = true;
         for(User user: users) {
-            if (!interestRepository.existsByUserAndItemAndInterestedTrue(user, item)) {
+            if (!interestRepository.existsByItemAndUser(item, user)
+                    && !Objects.equals(user.getUsername(), DefaultUsersService.DEBUG_USERNAME)) {
                 isAssessed = false;
             }
         }
@@ -94,12 +101,14 @@ public class InterestServiceImpl implements InterestService {
     public void updateInterest(Interest interest, boolean isInterested) {
         interest.setInterested(isInterested);
         interestRepository.save(interest);
+        updateTransactionStatusOfItem(interest.getItem());
     }
 
     @Override
     public void resetAllInterestsForItem(Item item){
         for(Interest interest : item.getInterests()) {
             interestRepository.delete(interest);
+            updateTransactionStatusOfItem(item);
         }
     }
 }

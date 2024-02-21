@@ -21,7 +21,10 @@ import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.Random;
+import java.util.stream.Collectors;
 
 @Service
 public class ItemServiceImpl implements ItemService {
@@ -176,31 +179,54 @@ public class ItemServiceImpl implements ItemService {
             return itemRepository.findAllByMark(searchItemsRequest.getMark());
         }
 
-        boolean requestHasType = searchItemsRequest.getType() != null;
-        boolean requestHasTags = searchItemsRequest.getTags().size() > 0;
-
-        if (requestHasTags && !requestHasType) {
-            String tags = String.join(",", searchItemsRequest.getTags());
-            return itemRepository.findAllByTags(
-                    tags
-            );
-        } else if (!requestHasTags && requestHasType) {
-            return itemRepository.findAllByType(
-                    searchItemsRequest.getType()
-            );
-        } else if (requestHasTags && requestHasType) {
-            String tags = String.join(",", searchItemsRequest.getTags());
-            return itemRepository.findAllByTypeAndTags(
-                    searchItemsRequest.getType(),
-                    tags
-            );
-        } else {
-            return null;
+        List<Item> items = itemRepository.findAll();
+        if (searchItemsRequest.getType() != null) {
+            ItemTypeName itemTypeName = itemTypeRepository.findById(searchItemsRequest.getType()).getName();
+            items = items.stream()
+                    .filter(item -> item.getType() != null && Objects.equals(item.getType().getName(), itemTypeName))
+                    .collect(Collectors.toList());
         }
+        if (searchItemsRequest.getStatus() != null) {
+            TransactionStatusName transactionStatusName = transactionStatusRepository.findById(searchItemsRequest.getStatus()).getName();
+            items = items.stream()
+                    .filter(item -> item.getTransaction().getTransactionStatus().getName().equals(transactionStatusName))
+                    .collect(Collectors.toList());
+        }
+        if (searchItemsRequest.getTags() != null) {
+            if (searchItemsRequest.getTags().size() > 0) {
+                List<String> lowerCaseSearchTags = searchItemsRequest.getTags().stream()
+                        .map(String::toLowerCase).toList();
+
+                items = items.stream()
+                        .filter(item -> item.getTags().stream()
+                                .anyMatch(tag -> lowerCaseSearchTags.contains(tag.getTag().toLowerCase())))
+                        .collect(Collectors.toList());
+            }
+        }
+        return items;
+
     }
 
     @Override
     public Item getItemOfTheDay() {
         return itemRepository.findById(itemOfTheDay);
+    }
+
+    @Override
+    public List<Item> findAllByTransactionStatus(TransactionStatusName transactionStatusName) {
+        TransactionStatus transactionStatus = transactionStatusRepository.findByName(transactionStatusName);
+
+        List<Item> items = itemRepository.findAll();
+        items.removeIf(item -> !Objects.equals(item.getTransaction().getTransactionStatus(), transactionStatus));
+
+        return items;
+    }
+
+    @Override
+    public Item getCasinoItem() {
+        List<Item> availableItems = findAllByTransactionStatus(TransactionStatusName.TRANSACTION_STATUS_AVAILABLE);
+        Random random = new Random();
+        int index = random.nextInt(availableItems.size());
+        return availableItems.get(index);
     }
 }

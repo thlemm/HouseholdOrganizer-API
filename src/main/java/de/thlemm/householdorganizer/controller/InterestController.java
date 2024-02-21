@@ -44,7 +44,6 @@ public class InterestController {
     public ResponseEntity<?> addInterest(@CurrentSecurityContext(expression = "authentication") Authentication authentication,
                                         @Valid @RequestBody AddInterestRequest addInterestRequest) {
 
-        Interest interest = new Interest();
         User authUser = userRepository.findByUsername(authentication.getName());
         User user = userRepository.findById(addInterestRequest.getUser());
         if (addInterestRequest.getUser() == null) {
@@ -89,6 +88,7 @@ public class InterestController {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
 
+        // ToDo: Move to service and check status
         interestRepository.delete(interest);
         return new ResponseEntity<>(HttpStatus.OK);
     }

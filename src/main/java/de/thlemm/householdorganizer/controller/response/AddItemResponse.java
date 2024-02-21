@@ -1,4 +1,4 @@
-package de.thlemm.householdorganizer.controller.resposnse;
+package de.thlemm.householdorganizer.controller.response;
 
 import de.thlemm.householdorganizer.model.Location;
 import lombok.Data;

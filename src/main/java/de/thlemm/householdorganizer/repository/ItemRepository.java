@@ -26,25 +26,6 @@ public interface ItemRepository extends JpaRepository<Item, Integer> {
             " GROUP BY item.id ORDER BY item.id DESC", nativeQuery = true)
     List<Item> findAllOfInterestByUserId(Long userId);
 
-    @Query(value="SELECT * FROM thlemmde_household.items item" +
-            JOIN_NECESSARY_FIELDS_FOR_MAPPING +
-            " WHERE it.type_id = :typeId" +
-            " AND EXISTS (SELECT 1 FROM (SELECT item.id FROM thlemmde_household.tags WHERE FIND_IN_SET(tags.tag, :tags) > 0) AS subquery WHERE subquery.id = item.id)" +
-            " GROUP BY item.id ORDER BY item.id", nativeQuery = true)
-    List<Item> findAllByTypeAndTags(Long typeId, String tags);
-
-    @Query(value="SELECT * FROM thlemmde_household.items item" +
-            JOIN_NECESSARY_FIELDS_FOR_MAPPING +
-            " WHERE FIND_IN_SET(LOWER(ta.tag), LOWER(:tags)) > 0" +
-            " GROUP BY item.id ORDER BY item.id", nativeQuery = true)
-    List<Item> findAllByTags(String tags);
-
-    @Query(value="SELECT * FROM thlemmde_household.items item" +
-            JOIN_NECESSARY_FIELDS_FOR_MAPPING +
-            " WHERE it.type_id = :typeId" +
-            " GROUP BY item.id ORDER BY item.id", nativeQuery = true)
-    List<Item> findAllByType(Long typeId);
-
     List<Item> findAllByLocation(Location location);
     boolean existsByLocation(Location location);
     boolean existsByMark(Long mark);

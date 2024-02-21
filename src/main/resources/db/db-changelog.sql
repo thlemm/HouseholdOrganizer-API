@@ -179,3 +179,10 @@ INSERT IGNORE INTO `transaction_status` (`id`, `name`) VALUES
     (5, 'TRANSACTION_STATUS_GIVEN_AWAY'),
     (6, 'TRANSACTION_STATUS_NOT_ASSESSED'),
     (7, 'TRANSACTION_STATUS_RESERVED');
+
+-- changeset thlemm:7 add:casinocodes
+CREATE TABLE `casino_codes` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `code` VARCHAR(6) UNIQUE,
+    PRIMARY KEY (`id`)
+);

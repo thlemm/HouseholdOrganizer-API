@@ -1,4 +1,4 @@
-package de.thlemm.householdorganizer.controller.resposnse;
+package de.thlemm.householdorganizer.controller.response;
 
 import lombok.Getter;
 import lombok.Setter;
