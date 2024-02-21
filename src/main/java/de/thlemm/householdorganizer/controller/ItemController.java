@@ -1,10 +1,11 @@
 package de.thlemm.householdorganizer.controller;
 
 import de.thlemm.householdorganizer.controller.request.AddItemRequest;
+import de.thlemm.householdorganizer.controller.request.GetRandomItemRequest;
 import de.thlemm.householdorganizer.controller.request.SearchItemsRequest;
 import de.thlemm.householdorganizer.controller.request.SetTransactionRequest;
-import de.thlemm.householdorganizer.controller.resposnse.AddItemResponse;
-import de.thlemm.householdorganizer.controller.resposnse.MessageResponse;
+import de.thlemm.householdorganizer.controller.response.AddItemResponse;
+import de.thlemm.householdorganizer.controller.response.MessageResponse;
 import de.thlemm.householdorganizer.model.*;
 
 import de.thlemm.householdorganizer.repository.*;
@@ -49,12 +50,28 @@ public class ItemController {
     TransactionStatusRepository transactionStatusRepository;
     @Autowired
     TransactionService transactionService;
+    @Autowired
+    CasinoCodeRepository casinoCodeRepository;
 
     @PreAuthorize("hasRole('ROLE_USER')")
     @GetMapping("/items")
     public List<Item> getItems() {
         List<Item> itemList = itemRepository.findAll();
         return filterInterested(itemList);
+    }
+
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @GetMapping("/items/{itemId}")
+    public ResponseEntity<?> getItemById(@PathVariable("itemId") Long itemId) {
+        Item item = itemRepository.findById(itemId);
+        item.setInterests(
+                item.getInterests().stream()
+                        .filter(Interest::getInterested)
+                        .collect(Collectors.toList())
+        );
+        return ResponseEntity.ok(
+                item
+        );
     }
 
     @PreAuthorize("hasRole('ROLE_USER')")
@@ -143,6 +160,9 @@ public class ItemController {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
+        if (searchItemsRequest.getStatus() != null && !transactionStatusRepository.existsById(searchItemsRequest.getStatus())) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
 
         return ResponseEntity.ok(
                 filterInterested(
@@ -182,8 +202,34 @@ public class ItemController {
 
     @GetMapping("/item/today")
     public ResponseEntity<?> getItemOfTheDay() {
+        Item item = itemService.getItemOfTheDay();
+        item.setInterests(
+                item.getInterests().stream()
+                        .filter(Interest::getInterested)
+                        .collect(Collectors.toList())
+        );
         return ResponseEntity.ok(
-                itemService.getItemOfTheDay()
+                item
+        );
+    }
+
+    @PostMapping("/item/casino")
+    public ResponseEntity<?> getRandomItem(@Valid @RequestBody GetRandomItemRequest getRandomItemRequest) {
+
+        CasinoCode casinoCode = casinoCodeRepository.findByCode(getRandomItemRequest.getCode());
+        if (casinoCode==null) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        casinoCodeRepository.delete(casinoCode);
+
+        Item item = itemService.getCasinoItem();
+        item.setInterests(
+                item.getInterests().stream()
+                        .filter(Interest::getInterested)
+                        .collect(Collectors.toList())
+        );
+        return ResponseEntity.ok(
+                item
         );
     }
 
@@ -193,18 +239,14 @@ public class ItemController {
             @PathVariable("itemId") Long itemId,
             @Valid @RequestBody SetTransactionRequest setTransactionRequest
     ) {
-        System.out.println("Request route successful");
         if (!itemRepository.existsById(itemId)) {
-            System.out.println("Item id does not exist");
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
         if(!transactionStatusRepository.existsById(setTransactionRequest.getTransactionStatusId())){
-            System.out.println("Status id does not exist");
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
         try {
-            System.out.println("Trying to set via service");
             transactionService.setTransaction(itemId, setTransactionRequest);
         } catch (TransactionServiceException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)

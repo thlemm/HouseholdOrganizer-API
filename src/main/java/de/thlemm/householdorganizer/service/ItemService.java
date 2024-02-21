@@ -3,6 +3,8 @@ package de.thlemm.householdorganizer.service;
 import de.thlemm.householdorganizer.controller.request.AddItemRequest;
 import de.thlemm.householdorganizer.controller.request.SearchItemsRequest;
 import de.thlemm.householdorganizer.model.Item;
+import de.thlemm.householdorganizer.model.TransactionStatus;
+import de.thlemm.householdorganizer.model.TransactionStatusName;
 import de.thlemm.householdorganizer.restore.RestoreItemData;
 
 import java.util.List;
@@ -14,4 +16,6 @@ public interface ItemService {
     List<Item> findAllBySearchRequest(SearchItemsRequest searchItemsRequest);
     void restoreItem(RestoreItemData restoreItemData);
     Item getItemOfTheDay();
+    List<Item> findAllByTransactionStatus(TransactionStatusName transactionStatusName);
+    Item getCasinoItem();
 }

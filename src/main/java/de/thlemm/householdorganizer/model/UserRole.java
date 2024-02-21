@@ -7,7 +7,7 @@ import javax.persistence.*;
 
 @Entity
 @Data
-@Table(name = "user_roles", schema="household_organizer")
+@Table(name = "user_roles", schema = "thlemmde_household")
 public class UserRole {
 
     @Id

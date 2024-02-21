@@ -1,6 +1,6 @@
 package de.thlemm.householdorganizer.controller;
 
-import de.thlemm.householdorganizer.controller.resposnse.MessageResponse;
+import de.thlemm.householdorganizer.controller.response.MessageResponse;
 import de.thlemm.householdorganizer.repository.ItemRepository;
 import de.thlemm.householdorganizer.service.FileService;
 import de.thlemm.householdorganizer.service.exception.FileStorageException;

@@ -8,7 +8,7 @@ import java.time.OffsetDateTime;
 
 @Entity
 @Data
-@Table(name = "transactions", schema = "household_organizer")
+@Table(name = "transactions", schema = "thlemmde_household")
 public class Transaction {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
