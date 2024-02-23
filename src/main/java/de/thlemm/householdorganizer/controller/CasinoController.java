@@ -30,7 +30,7 @@ public class CasinoController {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
-        return new ResponseEntity<>(HttpStatus.OK);
+        return ResponseEntity.ok(new MessageResponse("true"));
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
