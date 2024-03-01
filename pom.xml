@@ -16,7 +16,7 @@
     <name>HouseholdOrganizer</name>
     <description>Backend for the HouseholdOrganizer Project</description>
 
-    <packaging>war</packaging>
+    <packaging>jar</packaging>
 
     <properties>
         <java.version>17</java.version>
