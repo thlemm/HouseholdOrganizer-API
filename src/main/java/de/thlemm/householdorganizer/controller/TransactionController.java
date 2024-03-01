@@ -19,7 +19,7 @@ public class TransactionController {
     @Autowired
     TransactionStatusRepository transactionStatusRepository;
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_USER')")
     @GetMapping("/transactions/states")
     public ResponseEntity<?> transactionStates() {
         return ResponseEntity.ok(
