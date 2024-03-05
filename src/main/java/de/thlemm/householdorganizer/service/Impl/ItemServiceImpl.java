@@ -179,31 +179,53 @@ public class ItemServiceImpl implements ItemService {
             return itemRepository.findAllByMark(searchItemsRequest.getMark());
         }
 
-        List<Item> items = itemRepository.findAll();
-        if (searchItemsRequest.getType() != null) {
-            ItemTypeName itemTypeName = itemTypeRepository.findById(searchItemsRequest.getType()).getName();
-            items = items.stream()
-                    .filter(item -> item.getType() != null && Objects.equals(item.getType().getName(), itemTypeName))
-                    .collect(Collectors.toList());
-        }
-        if (searchItemsRequest.getStatus() != null) {
-            TransactionStatusName transactionStatusName = transactionStatusRepository.findById(searchItemsRequest.getStatus()).getName();
-            items = items.stream()
-                    .filter(item -> item.getTransaction().getTransactionStatus().getName().equals(transactionStatusName))
-                    .collect(Collectors.toList());
-        }
-        if (searchItemsRequest.getTags() != null) {
-            if (searchItemsRequest.getTags().size() > 0) {
-                List<String> lowerCaseSearchTags = searchItemsRequest.getTags().stream()
-                        .map(String::toLowerCase).toList();
+        boolean hasItemType = searchItemsRequest.getType() != null;
+        boolean hasTransactionStatus = searchItemsRequest.getStatus() != null;
+        boolean hasTags = searchItemsRequest.getTags().size() > 0;
+        System.out.println("Werte für Bedingungen: " + hasItemType + "; " + hasTransactionStatus + "; " + hasTags + "; ");
 
-                items = items.stream()
-                        .filter(item -> item.getTags().stream()
-                                .anyMatch(tag -> lowerCaseSearchTags.contains(tag.getTag().toLowerCase())))
-                        .collect(Collectors.toList());
-            }
+        if (hasItemType && !hasTransactionStatus && !hasTags) {
+            System.out.println("Anfrage hat nur ItemType");
+            return itemRepository.findAllByItemTypeId(
+                    itemTypeRepository.findById(searchItemsRequest.getType()).getId()
+            );
+        } else if (!hasItemType && hasTransactionStatus && !hasTags) {
+            System.out.println("Anfrage hat nur TransactionStatus");
+            return itemRepository.findAllByTransactionStatusId(
+                    transactionStatusRepository.findById(searchItemsRequest.getStatus()).getId()
+            );
+        } else if (!hasItemType && !hasTransactionStatus && hasTags) {
+            System.out.println("Anfrage hat nur Tags");
+            return itemRepository.findAllByTags(searchItemsRequest.getTags());
+        } else if (hasItemType && hasTransactionStatus && !hasTags) {
+            System.out.println("Anfrage hat ItemType und TransactionStatus");
+            return itemRepository.findAllByTransactionStatusIdAndItemTypeId(
+                    transactionStatusRepository.findById(searchItemsRequest.getStatus()).getId(),
+                    itemTypeRepository.findById(searchItemsRequest.getType()).getId()
+            );
+        }  else if (hasItemType && !hasTransactionStatus && hasTags) {
+            System.out.println("Anfrage hat ItemType und Tags");
+            return itemRepository.findAllByItemTypeIdAndTags(
+                    itemTypeRepository.findById(searchItemsRequest.getType()).getId(),
+                    searchItemsRequest.getTags()
+            );
+        }  else if (!hasItemType && hasTransactionStatus && hasTags) {
+            System.out.println("Anfrage hat TransactionStatus und Tags");
+            return itemRepository.findAllByTransactionStatusIdAndTags(
+                    transactionStatusRepository.findById(searchItemsRequest.getStatus()).getId(),
+                    searchItemsRequest.getTags()
+            );
+        }  else if (hasItemType && hasTransactionStatus && hasTags) {
+            System.out.println("Anfrage hat alles");
+            return itemRepository.findAllByTransactionStatusIdAndItemTypeIdAndTags(
+                    transactionStatusRepository.findById(searchItemsRequest.getStatus()).getId(),
+                    itemTypeRepository.findById(searchItemsRequest.getType()).getId(),
+                    searchItemsRequest.getTags()
+            );
+        }  else {
+            System.out.println("Anfrage passt auf keinen der Fälle");
+            return null;
         }
-        return items;
 
     }
 
